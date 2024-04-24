@@ -2,7 +2,6 @@ package spaces
 
 import (
 	"strings"
-	"time"
 
 	"github.com/spurtcms/categories"
 )
@@ -14,6 +13,7 @@ func SpaceSetup(config *Config) *Spaces {
 		DB:               config.DB,
 		AuthEnable:       config.AuthEnable,
 		PermissionEnable: config.PermissionEnable,
+		Auth:             config.Auth,
 	}
 }
 
@@ -115,22 +115,18 @@ func (spaces *Spaces) SpaceList(spacelistreq SpaceListReq) (tblspace []Tblspaces
 }
 
 /*SpaceDetail*/
-func (spaces *Spaces) SpaceDetail(spaceid int, spaceslug string) (space tblspaces, err error) {
+func (spaces *Spaces) SpaceDetail(spd SpaceDetail) (space Tblspacesaliases, err error) {
 
 	autherr := AuthandPermission(spaces)
 
 	if autherr != nil {
 
-		return tblspaces{}, autherr
+		return Tblspacesaliases{}, autherr
 	}
 
-	spacename, err1 := Spacemodel.GetSpacealiaseDetails(spaceid, spaceslug, spaces.DB)
+	spacename, err1 := Spacemodel.GetSpacealiaseDetails(spd.SpaceId, spd.SpaceSlug, spaces.DB)
 
-	tblspace, _ := Spacemodel.GetSpaceDetails(spaceid, spaces.DB)
-
-	tblspace.SpaceName = spacename.SpacesName
-
-	return tblspace, err1
+	return spacename, err1
 
 }
 
@@ -148,7 +144,7 @@ func (spaces *Spaces) SpaceCreation(SPC SpaceCreation) (tblspac Tblspacesaliases
 
 	space.PageCategoryId = SPC.CategoryId
 
-	space.CreatedOn, _ = time.Parse("2006-01-02 15:04:05", time.Now().UTC().Format("2006-01-02 15:04:05"))
+	space.CreatedOn = CurrentTime
 
 	space.CreatedBy = SPC.CreatedBy
 
@@ -164,7 +160,7 @@ func (spaces *Spaces) SpaceCreation(SPC SpaceCreation) (tblspac Tblspacesaliases
 
 	spacealiase.LanguageId = SPC.LanguageId
 
-	spacealiase.CreatedOn, _ = time.Parse("2006-01-02 15:04:05", time.Now().UTC().Format("2006-01-02 15:04:05"))
+	spacealiase.CreatedOn = CurrentTime
 
 	spacealiase.CreatedBy = SPC.CreatedBy
 
@@ -200,7 +196,7 @@ func (spaces *Spaces) SpaceUpdate(SPC SpaceCreation, spaceid int) error {
 
 	spaceali.ImagePath = SPC.ImagePath
 
-	spaceali.ModifiedOn, _ = time.Parse("2006-01-02 15:04:05", time.Now().UTC().Format("2006-01-02 15:04:05"))
+	spaceali.ModifiedOn = CurrentTime
 
 	spaceali.ModifiedBy = SPC.ModifiedBy
 
@@ -217,7 +213,7 @@ func (spaces *Spaces) SpaceUpdate(SPC SpaceCreation, spaceid int) error {
 
 	space.PageCategoryId = SPC.CategoryId
 
-	space.ModifiedOn, _ = time.Parse("2006-01-02 15:04:05", time.Now().UTC().Format("2006-01-02 15:04:05"))
+	space.ModifiedOn = CurrentTime
 
 	space.ModifiedBy = SPC.ModifiedBy
 
@@ -234,9 +230,16 @@ func (spaces *Spaces) SpaceUpdate(SPC SpaceCreation, spaceid int) error {
 
 func (spaces *Spaces) DeleteSpaceAliase(spaceid int, deletedBy int) error {
 
+	autherr := AuthandPermission(spaces)
+
+	if autherr != nil {
+
+		return autherr
+	}
+
 	var spacealias TblSpacesAliases
 
-	spacealias.DeletedOn, _ = time.Parse("2006-01-02 15:04:05", time.Now().UTC().Format("2006-01-02 15:04:05"))
+	spacealias.DeletedOn = CurrentTime
 
 	spacealias.DeletedBy = deletedBy
 
@@ -255,9 +258,16 @@ func (spaces *Spaces) DeleteSpaceAliase(spaceid int, deletedBy int) error {
 /*Delete Space*/
 func (spaces *Spaces) DeleteSpace(spaceid int, deletedBy int) error {
 
+	autherr := AuthandPermission(spaces)
+
+	if autherr != nil {
+
+		return autherr
+	}
+
 	var space TblSpaces
 
-	space.DeletedOn, _ = time.Parse("2006-01-02 15:04:05", time.Now().UTC().Format("2006-01-02 15:04:05"))
+	space.DeletedOn = CurrentTime
 
 	space.DeletedBy = deletedBy
 
@@ -268,9 +278,63 @@ func (spaces *Spaces) DeleteSpace(spaceid int, deletedBy int) error {
 	if err != nil {
 
 		return err
-	
+
 	}
 
 	return nil
 
+}
+
+// clone space - func helps to create duplicate space, using given space id
+func (spaces *Spaces) CloneSpace(spaceid int, createdBy int) (Tblspacesaliases, error) {
+
+	autherr := AuthandPermission(spaces)
+
+	if autherr != nil {
+
+		return Tblspacesaliases{}, autherr
+	}
+
+	space, err := spaces.SpaceDetail(SpaceDetail{SpaceId: spaceid})
+
+	if err != nil {
+
+		return Tblspacesaliases{}, err
+
+	}
+
+	var cspace tblspaces
+
+	cspace.PageCategoryId = space.PageCategoryId
+
+	cspace.CreatedBy = createdBy
+
+	cspace.CreatedOn = CurrentTime
+
+	latestspace, serr := Spacemodel.CreateSpace(cspace, spaces.DB)
+
+	if serr != nil {
+
+		return Tblspacesaliases{}, serr
+	}
+
+	var cspaceali Tblspacesaliases
+
+	cspaceali.CategoryId = space.PageCategoryId
+
+	cspaceali.SpacesId = latestspace.Id
+
+	cspaceali.SpacesName = space.SpacesName
+
+	cspaceali.SpacesSlug, _ = CreateSlug(space.SpacesName)
+
+	cspaceali.SpacesDescription = space.SpacesDescription
+
+	cspaceali.CreatedBy = createdBy
+
+	cspaceali.CreatedOn = CurrentTime
+
+	spacealise, err := Spacemodel.CreateSpaceAliase(cspaceali, spaces.DB)
+
+	return spacealise, err
 }

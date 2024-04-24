@@ -2,7 +2,6 @@ package spaces
 
 import (
 	"github.com/spurtcms/auth"
-	role "github.com/spurtcms/team-roles"
 	"gorm.io/gorm"
 )
 
@@ -11,7 +10,6 @@ type Config struct {
 	AuthEnable       bool
 	PermissionEnable bool
 	Auth             *auth.Auth
-	Permissions      *role.PermissionConfig
 }
 
 type Spaces struct {
@@ -19,5 +17,4 @@ type Spaces struct {
 	AuthEnable       bool
 	PermissionEnable bool
 	Auth             *auth.Auth
-	Permissions      *role.PermissionConfig
 }

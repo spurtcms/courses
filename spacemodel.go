@@ -1,106 +1,8 @@
 package spaces
 
 import (
-	"time"
-
-	"github.com/spurtcms/categories"
 	"gorm.io/gorm"
 )
-
-type SpaceListReq struct {
-	Offset         int
-	Limit          int
-	Keyword        string
-	CategoryId     int
-	LanguageEnable bool
-	SetLanguageId  string
-}
-
-type tblspaces struct {
-	Id             int
-	PageCategoryId int
-	CreatedOn      time.Time
-	CreatedBy      int
-	ModifiedOn     time.Time `gorm:"DEFAULT:NULL"`
-	ModifiedBy     int       `gorm:"DEFAULT:NULL"`
-	DeletedOn      time.Time `gorm:"DEFAULT:NULL"`
-	DeletedBy      int       `gorm:"DEFAULT:NULL"`
-	IsDeleted      int       `gorm:"DEFAULT:0"`
-	Username       string    `gorm:"-:migration;<-:false"`
-	CreatedDate    string    `gorm:"-"`
-	ModifiedDate   string    `gorm:"-"`
-	SpaceName      string    `gorm:"-"`
-}
-
-type Tblspacesaliases struct {
-	Id                   int
-	SpacesId             int
-	LanguageId           int
-	SpacesName           string
-	SpacesSlug           string
-	SpacesDescription    string
-	ImagePath            string
-	CreatedOn            time.Time
-	CreatedBy            int                        `gorm:"type:integer"`
-	ModifiedOn           time.Time                  `gorm:"DEFAULT:NULL"`
-	ModifiedBy           int                        `gorm:"type:integer;DEFAULT:NULL"`
-	DeletedOn            time.Time                  `gorm:"DEFAULT:NULL"`
-	DeletedBy            int                        `gorm:"type:integer;DEFAULT:NULL"`
-	IsDeleted            int                        `gorm:"type:integer;DEFAULT:0"`
-	PageCategoryId       int                        `gorm:"-:migration;column:page_category_id;<-:false"`
-	ParentId             int                        `gorm:"-:migration;column:parent_id;<-:false"`
-	CreatedDate          string                     `gorm:"-"`
-	ModifiedDate         string                     `gorm:"-"`
-	CategoryNames        []categories.TblCategories `gorm:"-"`
-	CategoryId           int                        `gorm:"-:migration;column:category_id;<-:false"`
-	FullSpaceAccess      bool                       `gorm:"-"`
-	SpaceFullDescription string                     `gorm:"-"`
-	ReadTime             string                     `gorm:"-"`
-	ViewCount            int                        `gorm:"type:integer"`
-	RecentTime           time.Time
-}
-
-type tblpagescategoriesaliases struct {
-	Id                  int    `gorm:"primaryKey;auto_increment"`
-	PageCategoryId      int    `gorm:"type:integer"`
-	LanguageId          int    `gorm:"type:integer"`
-	CategoryName        string `gorm:"type:character varying"`
-	CategorySlug        string `gorm:"type:character varying"`
-	CategoryDescription string `gorm:"type:character varying"`
-	CreatedOn           time.Time
-	CreatedBy           int       `gorm:"type:integer"`
-	ModifiedOn          time.Time `gorm:"DEFAULT:NULL"`
-	ModifiedBy          int       `gorm:"type:integer;DEFAULT:NULL"`
-	DeletedOn           time.Time `gorm:"DEFAULT:NULL"`
-	DeletedBy           int       `gorm:"type:integer;DEFAULT:NULL"`
-	IsDeleted           int       `gorm:"type:integer;DEFAULT:0"`
-	ParentId            int       `gorm:"type:integer"`
-}
-
-type tblpagescategories struct {
-	Id         int `gorm:"primaryKey;auto_increment"`
-	CreatedOn  time.Time
-	CreatedBy  int       `gorm:"type:integer"`
-	ModifiedOn time.Time `gorm:"DEFAULT:NULL"`
-	ModifiedBy int       `gorm:"type:integer;DEFAULT:NULL"`
-	DeletedOn  time.Time `gorm:"DEFAULT:NULL"`
-	DeletedBy  int       `gorm:"type:integer;DEFAULT:NULL"`
-	IsDeleted  int       `gorm:"type:integer;DEFAULT:0"`
-}
-
-type SpaceCreation struct {
-	Name        string
-	Description string
-	ImagePath   string
-	CategoryId  int //child category id
-	LanguageId  int //For specific language space
-	CreatedBy   int
-	ModifiedBy  int
-}
-
-type SpaceModel struct{}
-
-var Spacemodel SpaceModel
 
 /*spaceList*/
 func (SpaceModel) SpaceList(spacereq SpaceListReq, spaceid []int, DB *gorm.DB) (tblspace []Tblspacesaliases, spacecount int64, err error) {
@@ -109,7 +11,25 @@ func (SpaceModel) SpaceList(spacereq SpaceListReq, spaceid []int, DB *gorm.DB) (
 		Joins("inner join tbl_spaces on tbl_spaces_aliases.spaces_id = tbl_spaces.id").
 		Joins("inner join tbl_languages on tbl_languages.id = tbl_spaces_aliases.language_id").
 		Joins("inner join tbl_categories on tbl_categories.id = tbl_spaces.page_category_id").
-		Where("tbl_spaces.is_deleted = 0 and tbl_spaces_aliases.is_deleted = 0 and tbl_spaces_aliases.language_id = 1").Order("tbl_spaces.id desc")
+		Where("tbl_spaces.is_deleted = 0 and tbl_spaces_aliases.is_deleted = 0").Order("tbl_spaces.id desc")
+
+	if spacereq.LanguageEnable {
+
+		query = query.Where("tbl_spaces_aliases.language_id = ?", spacereq.SetLanguageId)
+	}
+
+	if spacereq.MemberAccessControl {
+
+		subquery := DB.Table("tbl_access_control_pages").Select("tbl_access_control_pages.entry_id").Joins("inner join tbl_access_control_user_group on tbl_access_control_user_group.id = tbl_access_control_pages.access_control_user_group_id").
+			Joins("inner join tbl_member_groups on tbl_member_groups.id = tbl_access_control_user_group.member_group_id").Joins("inner join tbl_members on tbl_members.member_group_id = tbl_member_groups.id")
+
+		innerSubQuery := DB.Table("tbl_channel_entries").Select("tbl_channel_entries.channel_id").Joins("inner join tbl_channels on tbl_channels.id = tbl_channel_entries.channel_id").Joins("inner join tbl_spaces on tbl_spaces.id = tbl_spaces_aliases.spaces_id").Where("tbl_spaces.is_deleted = 0 and tbl_spaces_aliases.is_deleted = 0")
+
+		subquery = subquery.Where("tbl_access_control_pages.spaces_id in (?)", innerSubQuery)
+
+		query = query.Where("tbl_spaces_aliases.spaces_id not in (?)", subquery)
+
+	}
 
 	if len(spaceid) != 0 {
 
@@ -121,6 +41,7 @@ func (SpaceModel) SpaceList(spacereq SpaceListReq, spaceid []int, DB *gorm.DB) (
 		query = query.Where("LOWER(TRIM(tbl_spaces_aliases.spaces_name)) ILIKE LOWER(TRIM(?))", "%"+spacereq.Keyword+"%")
 	}
 	if spacereq.CategoryId > 0 && spacereq.CategoryId != 0 {
+
 		query = query.Where("tbl_spaces.page_category_id IN (?)", spacereq.CategoryId)
 	}
 
@@ -148,9 +69,9 @@ func (SpaceModel) GetLastUpdatePageAliases(tblpageali *TblPageAliases, spaceid i
 	return nil
 }
 
-func (SpaceModel) GetSpacealiaseDetails(spaceid int, spaceslug string, DB *gorm.DB) (TblSpacesAliases Tblspacesaliases, err error) {
+func (SpaceModel) GetSpacealiaseDetails(spaceid int, spaceslug string, DB *gorm.DB) (TblSpacesAliase Tblspacesaliases, err error) {
 
-	query := DB.Table("tbl_spaces_aliases").First(&TblSpacesAliases)
+	query := DB.Model(TblSpacesAliases{}).First(&TblSpacesAliase)
 
 	if spaceid > 0 {
 
@@ -168,12 +89,12 @@ func (SpaceModel) GetSpacealiaseDetails(spaceid int, spaceslug string, DB *gorm.
 		return Tblspacesaliases{}, err
 	}
 
-	return TblSpacesAliases, nil
+	return TblSpacesAliase, nil
 }
 
 func (SpaceModel) GetSpaceDetails(id int, DB *gorm.DB) (tblspace tblspaces, err error) {
 
-	if err := DB.Table("tbl_spaces").Select("tbl_spaces.created_on,tbl_spaces.modified_on,tbl_users.username").Where("tbl_spaces.id=?", id).Joins("inner join tbl_users on tbl_users.id = tbl_spaces.created_by").First(&tblspace).Error; err != nil {
+	if err := DB.Model(TblSpaces{}).Select("tbl_spaces.created_on,tbl_spaces.modified_on,tbl_users.username").Where("tbl_spaces.id=?", id).Joins("inner join tbl_users on tbl_users.id = tbl_spaces.created_by").First(&tblspace).Error; err != nil {
 
 		return tblspaces{}, err
 	}
@@ -183,7 +104,7 @@ func (SpaceModel) GetSpaceDetails(id int, DB *gorm.DB) (tblspace tblspaces, err 
 
 func (SpaceModel) CreateSpace(tblspac tblspaces, DB *gorm.DB) (tblspace tblspaces, err error) {
 
-	if err := DB.Table("tbl_spaces").Create(&tblspac).Error; err != nil {
+	if err := DB.Model(TblSpaces{}).Create(&tblspac).Error; err != nil {
 
 		return tblspaces{}, err
 	}
@@ -193,7 +114,7 @@ func (SpaceModel) CreateSpace(tblspac tblspaces, DB *gorm.DB) (tblspace tblspace
 
 func (SpaceModel) CreateSpaceAliase(tblspac Tblspacesaliases, DB *gorm.DB) (tblspc Tblspacesaliases, err error) {
 
-	if err := DB.Table("tbl_spaces_aliases").Create(&tblspac).Error; err != nil {
+	if err := DB.Model(TblSpacesAliases{}).Create(&tblspac).Error; err != nil {
 
 		return Tblspacesaliases{}, err
 	}
@@ -204,7 +125,7 @@ func (SpaceModel) CreateSpaceAliase(tblspac Tblspacesaliases, DB *gorm.DB) (tbls
 /*Update Space*/
 func (SpaceModel) UpdateSpaceAliases(tblspace *Tblspacesaliases, id int, DB *gorm.DB) error {
 
-	DB.Table("tbl_spaces_aliases").Where("spaces_id = ?", tblspace.Id).UpdateColumns(map[string]interface{}{"spaces_name": tblspace.SpacesName, "spaces_description": tblspace.SpacesDescription, "spaces_slug": tblspace.SpacesSlug, "image_path": tblspace.ImagePath, "modified_by": tblspace.ModifiedBy, "modified_on": tblspace.ModifiedOn})
+	DB.Model(TblSpacesAliases{}).Where("spaces_id = ?", tblspace.Id).UpdateColumns(map[string]interface{}{"spaces_name": tblspace.SpacesName, "spaces_description": tblspace.SpacesDescription, "spaces_slug": tblspace.SpacesSlug, "image_path": tblspace.ImagePath, "modified_by": tblspace.ModifiedBy, "modified_on": tblspace.ModifiedOn})
 
 	return nil
 }
@@ -214,11 +135,11 @@ func (SpaceModel) UpdateSpace(tblspace *tblspaces, id int, DB *gorm.DB) error {
 
 	if tblspace.PageCategoryId != 0 {
 
-		DB.Table("tbl_spaces").Where("id = ?", tblspace.Id).UpdateColumns(map[string]interface{}{"page_category_id": tblspace.PageCategoryId, "modified_by": tblspace.ModifiedBy, "modified_on": tblspace.ModifiedOn})
+		DB.Model(TblSpaces{}).Where("id = ?", tblspace.Id).UpdateColumns(map[string]interface{}{"page_category_id": tblspace.PageCategoryId, "modified_by": tblspace.ModifiedBy, "modified_on": tblspace.ModifiedOn})
 
 	} else {
 
-		DB.Table("tbl_spaces").Where("id = ?", tblspace.Id).UpdateColumns(map[string]interface{}{"modified_by": tblspace.ModifiedBy, "modified_on": tblspace.ModifiedOn})
+		DB.Model(TblSpaces{}).Where("id = ?", tblspace.Id).UpdateColumns(map[string]interface{}{"modified_by": tblspace.ModifiedBy, "modified_on": tblspace.ModifiedOn})
 
 	}
 	return nil
@@ -238,7 +159,7 @@ func (SpaceModel) DeleteSpaceAliases(tblspace *TblSpacesAliases, id int, DB *gor
 /*Deleted space*/
 func (SpaceModel) DeleteSpace(tblspace *TblSpaces, id int, DB *gorm.DB) error {
 
-	if err := DB.Table("tbl_spaces").Where("id = ?", id).UpdateColumns(map[string]interface{}{"deleted_by": tblspace.DeletedBy, "deleted_on": tblspace.DeletedOn, "is_deleted": tblspace.IsDeleted}).Error; err != nil {
+	if err := DB.Model(TblSpaces{}).Where("id = ?", id).UpdateColumns(map[string]interface{}{"deleted_by": tblspace.DeletedBy, "deleted_on": tblspace.DeletedOn, "is_deleted": tblspace.IsDeleted}).Error; err != nil {
 
 		return err
 	}

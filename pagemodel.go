@@ -1,187 +1,8 @@
 package spaces
 
 import (
-	"time"
-
-	"gorm.io/datatypes"
 	"gorm.io/gorm"
 )
-
-type Tblpagesgroup struct {
-	Id         int       `gorm:"primaryKey;auto_increment"`
-	SpacesId   int       `gorm:"type:integer"`
-	CreatedOn  time.Time `gorm:"type:timestamp without time zone"`
-	CreatedBy  int       `gorm:"type:integer"`
-	ModifiedOn time.Time `gorm:"type:timestamp without time zone;DEFAULT:NULL"`
-	ModifiedBy int       `gorm:"DEFAULT:NULL"`
-	DeletedOn  time.Time `gorm:"type:timestamp without time zone;DEFAULT:NULL"`
-	DeletedBy  int       `gorm:"DEFAULT:NULL"`
-	IsDeleted  int       `gorm:"DEFAULT:0"`
-}
-
-type Tblpagesgroupaliases struct {
-	Id               int       `gorm:"primaryKey;auto_increment"`
-	PageGroupId      int       `gorm:"type:integer"`
-	LanguageId       int       `gorm:"type:integer"`
-	GroupName        string    `gorm:"type:character varying"`
-	GroupSlug        string    `gorm:"type:character varying"`
-	GroupDescription string    `gorm:"type:character varying"`
-	CreatedOn        time.Time `gorm:"type:timestamp without time zone"`
-	CreatedBy        int       `gorm:"type:integer"`
-	ModifiedOn       time.Time `gorm:"type:timestamp without time zone;DEFAULT:NULL"`
-	ModifiedBy       int       `gorm:"type:integer;DEFAULT:NULL"`
-	DeletedOn        time.Time `gorm:"type:timestamp without time zone;DEFAULT:NULL"`
-	DeletedBy        int       `gorm:"type:integer;DEFAULT:NULL"`
-	IsDeleted        int       `gorm:"type:integer;DEFAULT:0"`
-	OrderIndex       int       `gorm:"type:integer"`
-}
-
-type Tblpagealiases struct {
-	Id               int       `gorm:"primaryKey;auto_increment"`
-	PageId           int       `gorm:"type:integer"`
-	LanguageId       int       `gorm:"type:integer"`
-	PageTitle        string    `gorm:"type:character varying"`
-	PageSlug         string    `gorm:"type:character varying"`
-	PageDescription  string    `gorm:"type:character varying"`
-	PublishedOn      time.Time `gorm:"type:timestamp without time zone;DEFAULT:NULL"`
-	Author           string    `gorm:"type:character varying"`
-	Excerpt          string    `gorm:"type:character varying"`
-	FeaturedImages   string    `gorm:"type:character varying"`
-	Access           string    `gorm:"type:character varying"`
-	MetaDetails      datatypes.JSONType[MetaDetails]
-	Status           string `gorm:"type:character varying"`
-	AllowComments    bool
-	CreatedOn        time.Time `gorm:"type:timestamp without time zone;DEFAULT:NULL"`
-	CreatedBy        int       `gorm:"type:integer"`
-	ModifiedOn       time.Time `gorm:"type:timestamp without time zone;DEFAULT:NULL"`
-	ModifiedBy       int       `gorm:"DEFAULT:NULL"`
-	DeletedOn        time.Time `gorm:"type:timestamp without time zone;DEFAULT:NULL"`
-	DeletedBy        int       `gorm:"DEFAULT:NULL"`
-	IsDeleted        int       `gorm:"DEFAULT:0"`
-	OrderIndex       int       `gorm:"type:integer"`
-	PageSuborder     int       `gorm:"type:integer"`
-	CreatedDate      string    `gorm:"-"`
-	ModifiedDate     string    `gorm:"-"`
-	Username         string    `gorm:"<-:false"`
-	PageGroupId      int       `gorm:"-:migration;<-:false"`
-	ParentId         int       `gorm:"-:migration;<-:false"`
-	LastRevisionDate time.Time `gorm:"type:timestamp without time zone;DEFAULT:NULL"`
-	LastRevisionNo   int       `gorm:"type:integer"`
-	ReadTime         int       `gorm:"type:integer"`
-}
-
-type Tblpagealiaseslog struct {
-	Id              int       `gorm:"primaryKey;auto_increment"`
-	PageId          int       `gorm:"type:integer"`
-	LanguageId      int       `gorm:"type:integer"`
-	PageTitle       string    `gorm:"type:character varying"`
-	PageSlug        string    `gorm:"type:character varying"`
-	PageDescription string    `gorm:"type:character varying"`
-	PublishedOn     time.Time `gorm:"type:timestamp without time zone;DEFAULT:NULL"`
-	Author          string    `gorm:"type:character varying"`
-	Excerpt         string    `gorm:"type:character varying"`
-	FeaturedImages  string    `gorm:"type:character varying"`
-	Access          string    `gorm:"type:character varying"`
-	MetaDetails     datatypes.JSONType[MetaDetails]
-	Status          string `gorm:"type:character varying"`
-	AllowComments   bool
-	CreatedOn       time.Time `gorm:"type:timestamp without time zone"`
-	CreatedBy       int       `gorm:"type:integer"`
-	ModifiedOn      time.Time `gorm:"type:timestamp without time zone;DEFAULT:NULL"`
-	ModifiedBy      int       `gorm:"type:integer;DEFAULT:NULL"`
-	DeletedOn       time.Time `gorm:"type:timestamp without time zone;DEFAULT:NULL"`
-	DeletedBy       int       `gorm:"type:integer;DEFAULT:NULL"`
-	CreatedDate     string    `gorm:"-"`
-	ModifiedDate    string    `gorm:"-"`
-	Username        string    `gorm:"-:migration;<-:false"`
-	PageGroupId     int       `gorm:"-:migration;<-:false"`
-	ParentId        int       `gorm:"-:migration;<-:false"`
-	ReadTime        int       `gorm:"type:integer"`
-}
-
-type PageCreate struct {
-	SpaceId       int          //spaceid
-	NewPages      []Pages      //pages only
-	NewGroup      []PageGroups //groups only
-	NewSubPage    []SubPages   //subpages only
-	UpdatePages   []Pages      //pages only
-	UpdateGroup   []PageGroups //groups only
-	UpdateSubPage []SubPages   //subpages only
-	DeletePages   []Pages      //delete pages only
-	DeleteGroup   []PageGroups //delete groups only
-	DeleteSubPage []SubPages   //delete subpages only
-	Status        string       //publish,draft
-}
-
-type PageLog struct {
-	Username string
-	Status   string
-	Date     time.Time
-}
-
-type PageGroups struct {
-	GroupId    int
-	NewGroupId int
-	Name       string
-	OrderIndex int `json:"OrderIndex"`
-}
-
-type Pages struct {
-	PgId        int
-	NewPgId     int
-	Name        string
-	Content     string `json:"Content"`
-	Pgroupid    int
-	NewGrpId    int
-	OrderIndex  int `json:"OrderIndex"`
-	ParentId    int
-	ReadTime    int
-	CreatedDate time.Time
-	LastUpdate  time.Time
-	Status      string
-	Date        string
-	Username    string
-	Log         []PageLog
-}
-
-type SubPages struct {
-	SpgId       int
-	NewSpId     int
-	Name        string
-	Content     string
-	ParentId    int
-	NewParentId int
-	PgroupId    int
-	NewPgroupId int
-	ReadTime    int
-	OrderIndex  int `json:"OrderIndex"`
-	CreatedDate time.Time
-	LastUpdate  time.Time
-	Status      string
-	Date        string
-	Username    string
-	Log         []PageLog
-}
-
-// pass any one only-- (ids,id,groupids,groupid,spaceid,spaceids)
-type DeletePagereq struct {
-	Ids       []int //bulk delete using id
-	Id        int   //individual id
-	GroupIds  []int //bulk group child pages delete
-	GroupId   int   //individual group pages delete
-	SpaceId   int   //delete page using spaceid
-	SpaceIds  []int //buik spaces pages delete
-	DeletedBy int
-}
-
-// pass any one only-- (groupids,groupid,spaceid,spaceids)
-type DeletePageGroupreq struct {
-	GroupIds  []int //bulk group child group delete
-	GroupId   int   //individual group delete
-	SpaceId   int   //delete pagegroup using spaceid
-	SpaceIds  []int //bulk pagesgroup delete using spaceid
-	DeletedBy int
-}
 
 // delete page group
 func (SpaceModel) DeletePageGroup(tblpage *TblPagesGroup, id int, DB *gorm.DB) error {
@@ -202,4 +23,124 @@ func (SpaceModel) GetPageDetailsBySpaceId(getpg *[]TblPage, id int, DB *gorm.DB)
 	}
 
 	return getpg, nil
+}
+
+/*Get page log*/
+func (SpaceModel) GetPageLogDetails(spaceid, pageid int, pageids []int, DB *gorm.DB) (tblpagelog []Tblpagealiaseslog, err error) {
+
+	query := DB.Table("tbl_page_aliases_logs").Select("tbl_page_aliases_logs.created_by,tbl_page_aliases_logs.created_on,tbl_page_aliases_logs.status,tbl_users.username,max(tbl_page_aliases_logs.modified_by) as modified_by,max(tbl_page_aliases_logs.modified_on) as modified_on").Joins("inner join tbl_pages on tbl_pages.id = tbl_page_aliases_logs.page_id").Joins("inner join tbl_users on tbl_users.id = tbl_page_aliases_logs.created_by").Group("tbl_page_aliases_logs.created_by,tbl_page_aliases_logs.created_on,tbl_page_aliases_logs.status,tbl_users.username").Order("tbl_page_aliases_logs.created_on desc").Find(&tblpagelog)
+
+	if spaceid != 0 {
+
+		query = query.Where("tbl_pages.spaces_id=?", spaceid)
+	}
+
+	if pageid != 0 {
+
+		query = query.Where("tbl_pages.page_id=?", pageid)
+	}
+
+	if err := query.Error; err != nil {
+
+		return []Tblpagealiaseslog{}, err
+	}
+
+	return tblpagelog, nil
+}
+
+func (SpaceModel) SelectPage(pagereq GetPageReq, DB *gorm.DB) (tblpage []TblPage, err error) {
+
+	query := DB.Table("tbl_pages").Where("is_deleted =0 ")
+
+	if len(pagereq.PageIds) != 0 {
+
+		query = query.Where("id in (?)", pagereq.PageIds)
+
+	}
+
+	if pagereq.Spaceid != 0 {
+
+		query = query.Where("spaces_id = ?", pagereq.Spaceid)
+	}
+
+	if pagereq.PageId != 0 {
+
+		query = query.Where("id = ? ", pagereq.PageId)
+	}
+
+	query.Find(&tblpage)
+
+	if err := query.Error; err != nil {
+
+		return []TblPage{}, err
+
+	}
+
+	return tblpage, nil
+}
+
+func (SpaceModel) PageAliases(ids []int, id int, memberaccess bool, memberid int, DB *gorm.DB) (tblpagegroup Tblpagealiases, err error) {
+
+	query := DB.Table("tbl_page_aliases").Select("tbl_page_aliases.*,tbl_pages.page_group_id,tbl_users.username")
+
+	query.Joins("inner join tbl_pages on tbl_pages.id = tbl_page_aliases.page_id")
+
+	query.Joins("inner join tbl_users on tbl_users.id = tbl_page_aliases.created_by").Where("tbl_pages.is_deleted=0 and tbl_page_aliases.is_deleted=0")
+
+	if memberaccess {
+
+		
+	}
+
+	if len(ids) > 0 {
+
+		query = query.Where("page_id in (?)", ids)
+	}
+
+	if id != 0 {
+
+		query = query.Where("page_id =?", id)
+	}
+
+	query.Find(&tblpagegroup)
+
+	if err := query.Error; err != nil {
+
+		return Tblpagealiases{}, err
+
+	}
+
+	return tblpagegroup, nil
+}
+
+func (SpaceModel) SelectGroup(tblgroup *[]TblPagesGroup, id int, grpid []int, DB *gorm.DB) error {
+
+	query := DB.Table("tbl_pages_groups").Where("spaces_id = ? and is_deleted=0", id)
+
+	if len(grpid) != 0 {
+
+		query = query.Where("id in (?)", grpid)
+
+	}
+
+	query.Find(&tblgroup)
+
+	if err := query.Error; err != nil {
+
+		return err
+
+	}
+
+	return nil
+}
+
+func (SpaceModel) PageGroup(tblpagegroup *TblPagesGroupAliases, id int, DB *gorm.DB) error {
+
+	if err := DB.Table("tbl_pages_group_aliases").Where("is_deleted = 0 and page_group_id = ?", id).First(&tblpagegroup).Error; err != nil {
+
+		return err
+
+	}
+
+	return nil
 }
