@@ -1,19 +1,11 @@
 package spaces
 
 import (
+	"strconv"
+
+	"github.com/spurtcms/member"
 	"gorm.io/gorm"
 )
-
-// delete page group
-func (SpaceModel) DeletePageGroup(tblpage *TblPagesGroup, id int, DB *gorm.DB) error {
-
-	if err := DB.Model(TblPagesGroup{}).Where("tbl_pages_groups.id=?", id).UpdateColumns(map[string]interface{}{"is_deleted": tblpage.IsDeleted, "deleted_on": tblpage.DeletedOn, "deleted_by": tblpage.DeletedBy}).Error; err != nil {
-
-		return err
-	}
-
-	return nil
-}
 
 func (SpaceModel) GetPageDetailsBySpaceId(getpg *[]TblPage, id int, DB *gorm.DB) (*[]TblPage, error) {
 
@@ -28,7 +20,11 @@ func (SpaceModel) GetPageDetailsBySpaceId(getpg *[]TblPage, id int, DB *gorm.DB)
 /*Get page log*/
 func (SpaceModel) GetPageLogDetails(spaceid, pageid int, pageids []int, DB *gorm.DB) (tblpagelog []Tblpagealiaseslog, err error) {
 
-	query := DB.Table("tbl_page_aliases_logs").Select("tbl_page_aliases_logs.created_by,tbl_page_aliases_logs.created_on,tbl_page_aliases_logs.status,tbl_users.username,max(tbl_page_aliases_logs.modified_by) as modified_by,max(tbl_page_aliases_logs.modified_on) as modified_on").Joins("inner join tbl_pages on tbl_pages.id = tbl_page_aliases_logs.page_id").Joins("inner join tbl_users on tbl_users.id = tbl_page_aliases_logs.created_by").Group("tbl_page_aliases_logs.created_by,tbl_page_aliases_logs.created_on,tbl_page_aliases_logs.status,tbl_users.username").Order("tbl_page_aliases_logs.created_on desc").Find(&tblpagelog)
+	query := DB.Table("tbl_page_aliases_logs").Select("tbl_page_aliases_logs.created_by,tbl_page_aliases_logs.created_on,tbl_page_aliases_logs.status,tbl_users.username,max(tbl_page_aliases_logs.modified_by) as modified_by,max(tbl_page_aliases_logs.modified_on) as modified_on")
+
+	query.Joins("inner join tbl_pages on tbl_pages.id = tbl_page_aliases_logs.page_id")
+
+	query.Joins("inner join tbl_users on tbl_users.id = tbl_page_aliases_logs.created_by").Group("tbl_page_aliases_logs.created_by,tbl_page_aliases_logs.created_on,tbl_page_aliases_logs.status,tbl_users.username").Order("tbl_page_aliases_logs.created_on desc")
 
 	if spaceid != 0 {
 
@@ -40,6 +36,8 @@ func (SpaceModel) GetPageLogDetails(spaceid, pageid int, pageids []int, DB *gorm
 		query = query.Where("tbl_pages.page_id=?", pageid)
 	}
 
+	query.Find(&tblpagelog)
+
 	if err := query.Error; err != nil {
 
 		return []Tblpagealiaseslog{}, err
@@ -48,7 +46,7 @@ func (SpaceModel) GetPageLogDetails(spaceid, pageid int, pageids []int, DB *gorm
 	return tblpagelog, nil
 }
 
-func (SpaceModel) SelectPage(pagereq GetPageReq, DB *gorm.DB) (tblpage []TblPage, err error) {
+func (SpaceModel) SelectPage(pagereq GetPageReq, DB *gorm.DB) (tblpage []TblPage, singlepage TblPage, err error) {
 
 	query := DB.Table("tbl_pages").Where("is_deleted =0 ")
 
@@ -66,20 +64,30 @@ func (SpaceModel) SelectPage(pagereq GetPageReq, DB *gorm.DB) (tblpage []TblPage
 	if pagereq.PageId != 0 {
 
 		query = query.Where("id = ? ", pagereq.PageId)
+
+		query.First(singlepage)
+
+		if err := query.Error; err != nil {
+
+			return []TblPage{}, TblPage{}, err
+
+		}
+
+		return []TblPage{}, singlepage, nil
 	}
 
 	query.Find(&tblpage)
 
 	if err := query.Error; err != nil {
 
-		return []TblPage{}, err
+		return []TblPage{}, TblPage{}, err
 
 	}
 
-	return tblpage, nil
+	return tblpage, TblPage{}, nil
 }
 
-func (SpaceModel) PageAliases(ids []int, id int, memberaccess bool, memberid int, DB *gorm.DB) (tblpagegroup Tblpagealiases, err error) {
+func (SpaceModel) PageAliases(page GetPageReq, DB *gorm.DB) (tblpage []Tblpagealiases, singepage Tblpagealiases, err error) {
 
 	query := DB.Table("tbl_page_aliases").Select("tbl_page_aliases.*,tbl_pages.page_group_id,tbl_users.username")
 
@@ -87,30 +95,59 @@ func (SpaceModel) PageAliases(ids []int, id int, memberaccess bool, memberid int
 
 	query.Joins("inner join tbl_users on tbl_users.id = tbl_page_aliases.created_by").Where("tbl_pages.is_deleted=0 and tbl_page_aliases.is_deleted=0")
 
-	if memberaccess {
+	if page.Memberaccess {
 
-		
+		var mem member.TblMember
+
+		DB.Model(member.TblMember{}).Where("is_deleted=0 and id=?", page.MemberId).First(&mem)
+
+		if !page.ContentHideonly {
+
+			subquery := `select tbl_access_control_pages.page_id from tbl_access_control_pages inner join tbl_access_control_pages on tbl_access_control_pages.access_control_user_group_id =tbl_access_control_user_groups.id Where member_group_id=` + strconv.Itoa(mem.MemberGroupId) + ` and tbl_access_control_user_groups.is_deleted=0`
+
+			query = query.Where("tbl_page_aliases.id not in (?)", subquery)
+
+		}
+
 	}
 
-	if len(ids) > 0 {
+	if page.PublishedPageonly {
 
-		query = query.Where("page_id in (?)", ids)
+		query = query.Where("tbl_page_aliases.status='publish'")
 	}
 
-	if id != 0 {
+	if page.Spaceid != 0 {
 
-		query = query.Where("page_id =?", id)
+		query = query.Where("tbl_pages.space_id = ?", page.Spaceid)
+
+	} else if len(page.PageIds) > 0 {
+
+		query = query.Where("page_id in (?)", page.PageIds)
+
+	} else if page.PageId != 0 {
+
+		query = query.Where("page_id =?", page.PageId)
+
+		query.First(&singepage)
+
+		if err := query.Error; err != nil {
+
+			return []Tblpagealiases{}, singepage, err
+
+		}
+
+		return tblpage, singepage, nil
 	}
 
-	query.Find(&tblpagegroup)
+	query.Find(&tblpage)
 
 	if err := query.Error; err != nil {
 
-		return Tblpagealiases{}, err
+		return []Tblpagealiases{}, Tblpagealiases{}, err
 
 	}
 
-	return tblpagegroup, nil
+	return tblpage, singepage, nil
 }
 
 func (SpaceModel) SelectGroup(tblgroup *[]TblPagesGroup, id int, grpid []int, DB *gorm.DB) error {
@@ -137,6 +174,156 @@ func (SpaceModel) SelectGroup(tblgroup *[]TblPagesGroup, id int, grpid []int, DB
 func (SpaceModel) PageGroup(tblpagegroup *TblPagesGroupAliases, id int, DB *gorm.DB) error {
 
 	if err := DB.Table("tbl_pages_group_aliases").Where("is_deleted = 0 and page_group_id = ?", id).First(&tblpagegroup).Error; err != nil {
+
+		return err
+
+	}
+
+	return nil
+}
+
+/*Delete PageAliases*/
+func (SpaceModel) DeletePageAliase(tblpage *TblPageAliases, delpage DeletePagereq, DB *gorm.DB) error {
+
+	query := DB.Model(TblPageAliases{})
+
+	if delpage.SpaceId != 0 {
+
+		subquery := `select id from tbl_pages where space_id = ` + strconv.Itoa(delpage.SpaceId) + ``
+
+		query = query.Where("page_id=(?)", subquery)
+
+	} else if len(delpage.GroupIds) != 0 {
+
+		str := convertarrayintToString(delpage.GroupIds, ",")
+
+		subquery := `select id from tbl_pages where page_group_id in (` + str + `)`
+
+		query = query.Where("page_id=(?)", subquery)
+
+	} else if delpage.GroupId != 0 {
+
+		subquery := `select id from tbl_pages where page_group_id = ` + strconv.Itoa(delpage.GroupId) + ``
+
+		query = query.Where("page_id = (?)", subquery)
+
+	} else if len(delpage.Ids) != 0 {
+
+		query.Where("page_id in (?)", delpage.Ids)
+
+	} else if delpage.Id != 0 {
+
+		query.Where("page_id=?", delpage.Id)
+
+	}
+
+	query.UpdateColumns(map[string]interface{}{"deleted_on": tblpage.DeletedOn, "deleted_by": tblpage.DeletedBy, "is_deleted": 1})
+
+	if err := query.Error; err != nil {
+
+		return err
+	}
+
+	return nil
+
+}
+
+/*Delete PageAliases*/
+func (SpaceModel) DeletePage(tblpage *TblPage, delpage DeletePagereq, DB *gorm.DB) error {
+
+	query := DB.Model(TblPage{})
+
+	if delpage.SpaceId != 0 {
+
+	} else if len(delpage.GroupIds) != 0 {
+
+		query = query.Where("space_id=?", delpage.SpaceId)
+
+	} else if delpage.GroupId != 0 {
+
+		query = query.Where("page_group_id=?", delpage.GroupId)
+
+	} else if len(delpage.Ids) != 0 {
+
+		query.Where("id in (?)", delpage.Ids)
+
+	} else if delpage.Id != 0 {
+
+		query.Where("id=?", delpage.Id)
+
+	}
+
+	query.UpdateColumns(map[string]interface{}{"deleted_on": tblpage.DeletedOn, "deleted_by": tblpage.DeletedBy, "is_deleted": 1})
+
+	if err := query.Error; err != nil {
+
+		return err
+	}
+
+	return nil
+
+}
+
+/* Delete group */
+func (SpaceModel) DeletePageGroup(tblpagegroup *TblPagesGroup, delpgg DeletePageGroupreq, DB *gorm.DB) error {
+
+	query := DB.Model(TblPagesGroup{})
+
+	if delpgg.SpaceId != 0 {
+
+		query = query.Where("space_id=?", delpgg.SpaceId)
+
+	} else if len(delpgg.GroupIds) != 0 {
+
+		str := convertarrayintToString(delpgg.GroupIds, ",")
+
+		subquery := `select id from tbl_page_groups where id in (` + str + `)`
+
+		query = query.Where("id in (?)", subquery)
+
+	} else if delpgg.GroupId != 0 {
+
+		query = query.Where("id=?", delpgg.GroupId)
+
+	}
+
+	query.UpdateColumns(map[string]interface{}{"is_deleted": 1, "deleted_on": tblpagegroup.DeletedOn, "deleted_by": tblpagegroup.DeletedBy})
+
+	if err := query.Error; err != nil {
+
+		return err
+
+	}
+
+	return nil
+}
+
+/* Delete Groupaliases */
+func (SpaceModel) DeletePageGroupAliases(tblpagegroup *TblPagesGroupAliases, delpgg DeletePageGroupreq, DB *gorm.DB) error {
+
+	query := DB.Model(TblPagesGroupAliases{})
+
+	if delpgg.SpaceId != 0 {
+
+		query = query.Where("space_id=?", delpgg.SpaceId)
+
+	} else if len(delpgg.GroupIds) != 0 {
+
+		str := convertarrayintToString(delpgg.GroupIds, ",")
+
+		subquery := `select id from tbl_page_group_aliases where id in (` + str + `)`
+
+		query = query.Where("page_group_id in (?)", subquery)
+
+	} else if delpgg.GroupId != 0 {
+
+		query = query.Where("page_group_id=?", delpgg.GroupId)
+
+	}
+
+	query.UpdateColumns(map[string]interface{}{"is_deleted": 1, "deleted_on": tblpagegroup.DeletedOn, "deleted_by": tblpagegroup.DeletedBy})
+
+	if err := query.Error; err != nil {
 
 		return err
 

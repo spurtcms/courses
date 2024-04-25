@@ -53,7 +53,7 @@ type Tblspacesaliases struct {
 	ParentId             int                        `gorm:"-:migration;column:parent_id;<-:false"`
 	CreatedDate          string                     `gorm:"-"`
 	ModifiedDate         string                     `gorm:"-"`
-	CategoryNames        []categories.TblCategories `gorm:"-"`
+	CategoryNames        []categories.Tblcategories `gorm:"-"`
 	CategoryId           int                        `gorm:"-:migration;column:category_id;<-:false"`
 	FullSpaceAccess      bool                       `gorm:"-"`
 	SpaceFullDescription string                     `gorm:"-"`

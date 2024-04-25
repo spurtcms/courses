@@ -164,29 +164,31 @@ type SubPages struct {
 
 // pass any one only-- (ids,id,groupids,groupid,spaceid,spaceids)
 type DeletePagereq struct {
-	Id        int   //individual id
-	GroupId   int   //(optional)-individual group pages delete
-	Ids       []int //(optional)-bulk delete using id
-	GroupIds  []int //(optional)-bulk group child pages delete
-	SpaceId   int   //(optional)-delete page using spaceid
-	SpaceIds  []int //(optional)-buik spaces pages delete
+	Id       int   //individual id
+	GroupId  int   //(optional)-individual group pages delete
+	Ids      []int //(optional)-bulk delete using id
+	GroupIds []int //(optional)-bulk group child pages delete
+	SpaceId  int   //(optional)-delete page using spaceid
+	// SpaceIds  []int //(optional)-buik spaces pages delete
 	DeletedBy int
 }
 
 // pass any one only-- (groupids,groupid,spaceid,spaceids)
 type DeletePageGroupreq struct {
-	GroupId   int   //individual group delete
-	SpaceId   int   //(optional)-delete pagegroup using spaceid
-	GroupIds  []int //(optional)-bulk group child group delete
-	SpaceIds  []int //(optional)-bulk pagesgroup delete using spaceid
+	GroupId  int   //individual group delete
+	SpaceId  int   //(optional)-delete pagegroup using spaceid
+	GroupIds []int //(optional)-bulk group child group delete
+	// SpaceIds  []int //(optional)-bulk pagesgroup delete using spaceid
 	DeletedBy int
 }
 
 // pass any one only-- (spaceid,PageIds,PageId)
 type GetPageReq struct {
-	Spaceid      int
-	PageIds      []int
-	PageId       int
-	Memberaccess bool
-	MemberId     int
+	Spaceid           int   //(optional)-get pages using spaceid
+	PageIds           []int //(optional)-get pages using pageids
+	PageId            int   //want individual page details pass particular pageid
+	Memberaccess      bool
+	PublishedPageonly bool
+	ContentHideonly   bool //if you want hide content only , memberaccess enable true otherwise it doesn't fetch the page
+	MemberId          int
 }

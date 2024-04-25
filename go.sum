@@ -6,6 +6,8 @@ github.com/golang-jwt/jwt v3.2.2+incompatible h1:IfV12K8xAKAnZqdXVzCZ+TOjboZ2keL
 github.com/golang-jwt/jwt v3.2.2+incompatible/go.mod h1:8pz2t5EyA70fFQQSrl6XZXzqecmYZeUEB8OUGHkxJ+I=
 github.com/golang-sql/civil v0.0.0-20220223132316-b832511892a9 h1:au07oEsX2xN0ktxqI+Sida1w446QrXBRJ0nee3SNZlA=
 github.com/golang-sql/sqlexp v0.1.0 h1:ZCD6MBpcuOVfGVqsEmY5/4FtYiKz6tSyUv9LPEDei6A=
+github.com/google/uuid v1.6.0 h1:NIvaJDMOsjHA8n1jAhLSgzrAzy1Hgr+hNrb57e+94F0=
+github.com/google/uuid v1.6.0/go.mod h1:TIyPZe4MgqvfeYDBFedMoGGpEw/LqOeaOT+nhxU+yHo=
 github.com/jackc/pgpassfile v1.0.0 h1:/6Hmqy13Ss2zCq62VdNG8tM1wchn8zjSGOBJ6icpsIM=
 github.com/jackc/pgservicefile v0.0.0-20231201235250-de7065d80cb9 h1:L0QtFUgDarD7Fpv9jeVMgy/+Ec0mtnmYuImjTz6dtDA=
 github.com/jackc/pgservicefile v0.0.0-20231201235250-de7065d80cb9/go.mod h1:5TJZWKEWniPve33vlWYSoGYefn3gLQRzjfDlhSJ9ZKM=
@@ -23,6 +25,10 @@ github.com/spurtcms/auth v0.0.0-20240422143037-2687a406bba1 h1:6M/Y3cycWMYaZK1nA
 github.com/spurtcms/auth v0.0.0-20240422143037-2687a406bba1/go.mod h1:R/BQhE+PUZ/eGTgS23lv62uWkzfu/NzVWHxibC6yu1g=
 github.com/spurtcms/categories v0.0.0-20240418141402-94f0eef33d9d h1:T95oqp/638Y/zujTbEEMZct9wsqt2K8qBc/g5pCdzyg=
 github.com/spurtcms/categories v0.0.0-20240418141402-94f0eef33d9d/go.mod h1:pZq9EtagmSenH+AG5p20xVp2ZEPadlRye8RU0dLOIPI=
+github.com/spurtcms/categories v0.0.0-20240423142002-562639af9c70 h1:heWvft/a+bUxnYfWoYDnRu8QeJW7bnUbLTZZo7IJYBI=
+github.com/spurtcms/categories v0.0.0-20240423142002-562639af9c70/go.mod h1:pZq9EtagmSenH+AG5p20xVp2ZEPadlRye8RU0dLOIPI=
+github.com/spurtcms/member v0.0.0-20240422143016-b6d2143146c0 h1:yHsypFvhjIMtmWO/4UQBb5XRZt1/WdlDUMS9ZwbIOh8=
+github.com/spurtcms/member v0.0.0-20240422143016-b6d2143146c0/go.mod h1:kmWxVMdbS7HVqaxYCyQoSQv7FU5gy/Ymo9MXRkzeGO4=
 github.com/spurtcms/team-roles v0.0.0-20240415142624-666b8897005b h1:hnAdxkSBR6IWK/itrdFBdbNy+jjSnDIYuF6ZGET8OoM=
 github.com/spurtcms/team-roles v0.0.0-20240415142624-666b8897005b/go.mod h1:5HOK30Lr10UQ1HLmXcPaluBRPCLUcYgQg31vBQYKoRQ=
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=

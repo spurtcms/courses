@@ -40,11 +40,11 @@ func (spaces *Spaces) SpaceList(spacelistreq SpaceListReq) (tblspace []Tblspaces
 
 		child_page, _ := categories.Categorymodel.GetCategoryById(space.PageCategoryId, spaces.DB)
 
-		var categorynames []categories.TblCategories
+		var categorynames []categories.Tblcategories
 
 		var flg int
 
-		// categorynames = append(categorynames, child_page)
+		categorynames = append(categorynames, child_page)
 
 		flg = child_page.ParentId
 
@@ -69,13 +69,13 @@ func (spaces *Spaces) SpaceList(spacelistreq SpaceListReq) (tblspace []Tblspaces
 
 				if flg != 0 {
 
-					// categorynames = append(categorynames, child)
+					categorynames = append(categorynames, child)
 
 					goto CLOOP
 
 				} else {
 
-					// categorynames = append(categorynames, child)
+					categorynames = append(categorynames, child)
 
 					break
 				}
@@ -84,7 +84,7 @@ func (spaces *Spaces) SpaceList(spacelistreq SpaceListReq) (tblspace []Tblspaces
 
 		}
 
-		var reverseCategoryOrder []categories.TblCategories
+		var reverseCategoryOrder []categories.Tblcategories
 
 		for i := len(categorynames) - 1; i >= 0; i-- {
 
