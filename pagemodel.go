@@ -331,3 +331,99 @@ func (SpaceModel) DeletePageGroupAliases(tblpagegroup *TblPagesGroupAliases, del
 
 	return nil
 }
+
+func (SpaceModel) CreatePageGroup(tblpagegroup *TblPagesGroup, DB *gorm.DB) (*TblPagesGroup, error) {
+
+	if err := DB.Table("tbl_pages_groups").Create(&tblpagegroup).Error; err != nil {
+
+		return &TblPagesGroup{}, err
+	}
+
+	return tblpagegroup, nil
+
+}
+
+/*Create PagegroupAliases */
+func (SpaceModel) CreatePageGroupAliases(tblpagegroup *TblPagesGroupAliases, DB *gorm.DB) (TblPagesGroupAliases, error) {
+
+	if err := DB.Table("tbl_pages_group_aliases").Create(&tblpagegroup).Error; err != nil {
+
+		return *tblpagegroup, err
+	}
+
+	return *tblpagegroup, nil
+}
+
+/*pdate pagegroupAliases */
+func (SpaceModel) UpdatePageGroupAliases(tblpagegroup *TblPagesGroupAliases, id int, DB *gorm.DB) (TblPagesGroupAliases, error) {
+
+	query := DB.Table("tbl_pages_group_aliases").Where("page_group_id = ?", id).UpdateColumns(map[string]interface{}{"group_name": tblpagegroup.GroupName, "group_slug": tblpagegroup.GroupSlug, "group_description": tblpagegroup.GroupDescription, "language_id": tblpagegroup.LanguageId, "modified_on": tblpagegroup.ModifiedOn, "modified_by": tblpagegroup.ModifiedBy})
+
+	if err := query.Error; err != nil {
+
+		return TblPagesGroupAliases{}, err
+	}
+
+	return *tblpagegroup, nil
+}
+
+/*Create page log*/
+func (SpaceModel) PageAliasesLog(tblpagelog *TblPageAliasesLog, DB *gorm.DB) (TblPageAliasesLog, error) {
+
+	if err := DB.Table("tbl_page_aliases_logs").Create(&tblpagelog).Error; err != nil {
+
+		return TblPageAliasesLog{}, err
+	}
+
+	return *tblpagelog, nil
+}
+
+/*CreatePage*/
+func (SpaceModel) CreatePage(tblpage *TblPage, DB *gorm.DB) (*TblPage, error) {
+
+	if err := DB.Table("tbl_pages").Create(&tblpage).Error; err != nil {
+
+		return &TblPage{}, err
+	}
+	return tblpage, nil
+
+}
+
+// create PageAliases
+func (SpaceModel) CreatepageAliases(tblpageAliases *TblPageAliases, DB *gorm.DB) (TblPageAliases, error) {
+
+	if err := DB.Table("tbl_page_aliases").Create(&tblpageAliases).Error; err != nil {
+
+		return *tblpageAliases, err
+	}
+
+	return *tblpageAliases, nil
+
+}
+
+/*update page*/
+func (SpaceModel) UpdatePage(tblpage *TblPage, pageid int, DB *gorm.DB) error {
+
+	if err := DB.Table("tbl_pages").Where("id=?", pageid).UpdateColumns(map[string]interface{}{"page_group_id": tblpage.PageGroupId, "parent_id": tblpage.ParentId}).Error; err != nil {
+
+		return err
+	}
+
+	return nil
+}
+
+/*update pagealiases*/
+func (SpaceModel) UpdatePageAliase(tblpageali *TblPageAliases, pageid int, DB *gorm.DB) (TblPageAliases, error) {
+
+	query := DB.Table("tbl_page_aliases").Where("page_id=?", pageid).UpdateColumns(map[string]interface{}{
+		"page_title": tblpageali.PageTitle, "page_slug": tblpageali.PageSlug, "modified_on": tblpageali.ModifiedOn,
+		"modified_by": tblpageali.ModifiedBy, "page_description": tblpageali.PageDescription, "order_index": tblpageali.OrderIndex, "status": tblpageali.Status, "read_time": tblpageali.ReadTime})
+
+	if err := query.Error; err != nil {
+
+		return TblPageAliases{}, err
+
+	}
+
+	return *tblpageali, nil
+}

@@ -120,19 +120,16 @@ type PageLog struct {
 
 type PageGroups struct {
 	GroupId    int
-	NewGroupId int
 	Name       string
 	OrderIndex int `json:"OrderIndex"`
 }
 
 type Pages struct {
-	PgId        int
-	NewPgId     int
-	Name        string
-	Content     string `json:"Content"`
+	PageId      int
+	Title       string
+	Content     string
 	Pgroupid    int
-	NewGrpId    int
-	OrderIndex  int `json:"OrderIndex"`
+	OrderIndex  int
 	ParentId    int
 	ReadTime    int
 	CreatedDate time.Time
@@ -141,17 +138,16 @@ type Pages struct {
 	Date        string
 	Username    string
 	Log         []PageLog
+	CreatedBy   int
+	ModifiedBy  int
 }
 
 type SubPages struct {
-	SpgId       int
-	NewSpId     int
-	Name        string
+	SubPageId   int
+	Title       string
 	Content     string
 	ParentId    int
-	NewParentId int
 	PgroupId    int
-	NewPgroupId int
 	ReadTime    int
 	OrderIndex  int `json:"OrderIndex"`
 	CreatedDate time.Time
@@ -160,6 +156,7 @@ type SubPages struct {
 	Date        string
 	Username    string
 	Log         []PageLog
+	CreatedBy   int
 }
 
 // pass any one only-- (ids,id,groupids,groupid,spaceid,spaceids)

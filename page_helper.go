@@ -68,9 +68,9 @@ func GetPageBySpaceIdORPageIds(pagereq GetPageReq, DB *gorm.DB) ([]Pages, error)
 
 	for _, val := range page_aliases {
 
-		one_page.PgId = val.PageId
+		one_page.PageId = val.PageId
 
-		one_page.Name = val.PageTitle
+		one_page.Title = val.PageTitle
 
 		one_page.Content = val.PageDescription
 
@@ -149,9 +149,9 @@ func GetPageByPageId(pagereq GetPageReq, DB *gorm.DB) (Pages, error) {
 
 	_, page_aliases, _ := Spacemodel.PageAliases(pagereq, DB)
 
-	one_page.PgId = page_aliases.PageId
+	one_page.PageId = page_aliases.PageId
 
-	one_page.Name = page_aliases.PageTitle
+	one_page.Title = page_aliases.PageTitle
 
 	one_page.Content = page_aliases.PageDescription
 
@@ -237,9 +237,9 @@ func GetSubPageBySpaceIdORPageIds(pagereq GetPageReq, DB *gorm.DB) ([]SubPages, 
 
 	for _, val := range page_aliases {
 
-		subpage.SpgId = val.PageId
+		subpage.SubPageId = val.PageId
 
-		subpage.Name = val.PageTitle
+		subpage.Title = val.PageTitle
 
 		subpage.Content = val.PageDescription
 
@@ -317,7 +317,7 @@ func GetSubPageByPageId(pagereq GetPageReq, DB *gorm.DB) (SubPages, error) {
 
 	_, page_aliases, _ := Spacemodel.PageAliases(pagereq, DB)
 
-	one_page.Name = page_aliases.PageTitle
+	one_page.Title = page_aliases.PageTitle
 
 	one_page.Content = page_aliases.PageDescription
 
