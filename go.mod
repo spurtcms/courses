@@ -1,4 +1,4 @@
-module github.com/spurtcms/spaces
+module github.com/spurtcms/courses
 
 go 1.19
 

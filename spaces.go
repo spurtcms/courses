@@ -1,6 +1,7 @@
 package spaces
 
 import (
+	"github.com/spurtcms/courses/migration"
 	"strings"
 
 	"github.com/spurtcms/categories"
@@ -8,6 +9,8 @@ import (
 
 // spacesetup
 func SpaceSetup(config *Config) *Spaces {
+
+	migration.AutoMigration(config.DB, config.DataBaseType)
 
 	return &Spaces{
 		DB:               config.DB,
@@ -21,14 +24,12 @@ func SpaceSetup(config *Config) *Spaces {
 func (spaces *Spaces) SpaceList(spacelistreq SpaceListReq) (tblspace []Tblspacesaliases, totalcount int64, err error) {
 
 	autherr := AuthandPermission(spaces)
-
 	if autherr != nil {
 
 		return []Tblspacesaliases{}, 0, autherr
 	}
 
 	spacess, _, spaceerr := Spacemodel.SpaceList(spacelistreq, []int{}, spaces.DB)
-
 	if spaceerr != nil {
 
 		return []Tblspacesaliases{}, 0, spaceerr
@@ -39,13 +40,11 @@ func (spaces *Spaces) SpaceList(spacelistreq SpaceListReq) (tblspace []Tblspaces
 	for _, space := range spacess {
 
 		child_page, _ := categories.Categorymodel.GetCategoryById(space.PageCategoryId, spaces.DB)
-
 		var categorynames []categories.Tblcategories
 
 		var flg int
 
 		categorynames = append(categorynames, child_page)
-
 		flg = child_page.ParentId
 
 		var count int
@@ -57,26 +56,20 @@ func (spaces *Spaces) SpaceList(spacelistreq SpaceListReq) (tblspace []Tblspaces
 			for {
 
 				count++
-
 				if count >= 50 { // for safe
-
 					break //for safe
 				}
 
 				child, _ := categories.Categorymodel.GetCategoryById(flg, spaces.DB)
-
 				flg = child.ParentId
 
 				if flg != 0 {
 
 					categorynames = append(categorynames, child)
-
 					goto CLOOP
-
 				} else {
 
 					categorynames = append(categorynames, child)
-
 					break
 				}
 
@@ -85,23 +78,16 @@ func (spaces *Spaces) SpaceList(spacelistreq SpaceListReq) (tblspace []Tblspaces
 		}
 
 		var reverseCategoryOrder []categories.Tblcategories
-
 		for i := len(categorynames) - 1; i >= 0; i-- {
-
 			reverseCategoryOrder = append(reverseCategoryOrder, categorynames[i])
 
 		}
 
 		var pageupd TblPageAliases
-
 		Spacemodel.GetLastUpdatePageAliases(&pageupd, space.Id, spaces.DB)
-
 		space.SpaceFullDescription = space.SpacesDescription
-
 		Spiltdescription := TruncateDescription(space.SpacesDescription, 85)
-
 		space.SpacesDescription = Spiltdescription
-
 		space.CategoryNames = reverseCategoryOrder
 
 		SpaceDetails = append(SpaceDetails, space)
@@ -118,7 +104,6 @@ func (spaces *Spaces) SpaceList(spacelistreq SpaceListReq) (tblspace []Tblspaces
 func (spaces *Spaces) SpaceDetail(spd SpaceDetail) (space Tblspacesaliases, err error) {
 
 	autherr := AuthandPermission(spaces)
-
 	if autherr != nil {
 
 		return Tblspacesaliases{}, autherr
@@ -134,40 +119,26 @@ func (spaces *Spaces) SpaceDetail(spd SpaceDetail) (space Tblspacesaliases, err 
 func (spaces *Spaces) SpaceCreation(SPC SpaceCreation) (tblspac Tblspacesaliases, err error) {
 
 	autherr := AuthandPermission(spaces)
-
 	if autherr != nil {
 
 		return Tblspacesaliases{}, autherr
 	}
 
 	var space tblspaces
-
 	space.PageCategoryId = SPC.CategoryId
-
 	space.CreatedOn = CurrentTime
-
 	space.CreatedBy = SPC.CreatedBy
-
 	Spacemodel.CreateSpace(space, spaces.DB)
 
 	var spacealiase Tblspacesaliases
-
 	spacealiase.SpacesName = SPC.Name
-
 	spacealiase.SpacesDescription = SPC.Description
-
 	spacealiase.ImagePath = SPC.ImagePath
-
 	spacealiase.LanguageId = SPC.LanguageId
-
 	spacealiase.CreatedOn = CurrentTime
-
 	spacealiase.CreatedBy = SPC.CreatedBy
-
 	spacealiase.SpacesSlug = strings.ToLower(spacealiase.SpacesName)
-
 	spacealiase.SpacesId = space.Id
-
 	Spacemodel.CreateSpaceAliase(spacealiase, spaces.DB)
 
 	return spacealiase, nil
@@ -178,28 +149,19 @@ func (spaces *Spaces) SpaceCreation(SPC SpaceCreation) (tblspac Tblspacesaliases
 func (spaces *Spaces) SpaceUpdate(SPC SpaceCreation, spaceid int) error {
 
 	autherr := AuthandPermission(spaces)
-
 	if autherr != nil {
 
 		return autherr
 	}
 
 	var spaceali Tblspacesaliases
-
 	spaceali.Id = spaceid
-
 	spaceali.SpacesName = SPC.Name
-
 	spaceali.SpacesDescription = SPC.Description
-
 	spaceali.SpacesSlug = strings.ToLower(SPC.Name)
-
 	spaceali.ImagePath = SPC.ImagePath
-
 	spaceali.ModifiedOn = CurrentTime
-
 	spaceali.ModifiedBy = SPC.ModifiedBy
-
 	err1 := Spacemodel.UpdateSpaceAliases(&spaceali, spaceid, spaces.DB)
 
 	if err1 != nil {
@@ -208,15 +170,10 @@ func (spaces *Spaces) SpaceUpdate(SPC SpaceCreation, spaceid int) error {
 	}
 
 	var space tblspaces
-
 	space.Id = spaceid
-
 	space.PageCategoryId = SPC.CategoryId
-
 	space.ModifiedOn = CurrentTime
-
 	space.ModifiedBy = SPC.ModifiedBy
-
 	err2 := Spacemodel.UpdateSpace(&space, spaceid, spaces.DB)
 
 	if err2 != nil {
@@ -238,13 +195,9 @@ func (spaces *Spaces) DeleteSpaceAliase(spaceid int, deletedBy int) error {
 	}
 
 	var spacealias TblSpacesAliases
-
 	spacealias.DeletedOn = CurrentTime
-
 	spacealias.DeletedBy = deletedBy
-
 	spacealias.IsDeleted = 1
-
 	err := Spacemodel.DeleteSpaceAliases(&spacealias, spaceid, spaces.DB)
 
 	if err != nil {
@@ -266,13 +219,9 @@ func (spaces *Spaces) DeleteSpace(spaceid int, deletedBy int) error {
 	}
 
 	var space TblSpaces
-
 	space.DeletedOn = CurrentTime
-
 	space.DeletedBy = deletedBy
-
 	space.IsDeleted = 1
-
 	err := Spacemodel.DeleteSpace(&space, spaceid, spaces.DB)
 
 	if err != nil {
@@ -296,7 +245,6 @@ func (spaces *Spaces) CloneSpace(spaceid int, createdBy int) (Tblspacesaliases, 
 	}
 
 	space, err := spaces.SpaceDetail(SpaceDetail{SpaceId: spaceid})
-
 	if err != nil {
 
 		return Tblspacesaliases{}, err
@@ -304,13 +252,9 @@ func (spaces *Spaces) CloneSpace(spaceid int, createdBy int) (Tblspacesaliases, 
 	}
 
 	var cspace tblspaces
-
 	cspace.PageCategoryId = space.PageCategoryId
-
 	cspace.CreatedBy = createdBy
-
 	cspace.CreatedOn = CurrentTime
-
 	latestspace, serr := Spacemodel.CreateSpace(cspace, spaces.DB)
 
 	if serr != nil {
@@ -319,22 +263,42 @@ func (spaces *Spaces) CloneSpace(spaceid int, createdBy int) (Tblspacesaliases, 
 	}
 
 	var cspaceali Tblspacesaliases
-
 	cspaceali.CategoryId = space.PageCategoryId
-
 	cspaceali.SpacesId = latestspace.Id
-
 	cspaceali.SpacesName = space.SpacesName
-
 	cspaceali.SpacesSlug, _ = CreateSlug(space.SpacesName)
-
 	cspaceali.SpacesDescription = space.SpacesDescription
-
 	cspaceali.CreatedBy = createdBy
-
 	cspaceali.CreatedOn = CurrentTime
-
 	spacealise, err := Spacemodel.CreateSpaceAliase(cspaceali, spaces.DB)
 
 	return spacealise, err
+}
+
+// Dashboard pagescount function
+func (spaces *Spaces) DashboardPagesCount() (totalcount int, lasttendayscount int, err error) {
+
+	autherr := AuthandPermission(spaces)
+
+	if autherr != nil {
+
+		return 0, 0, autherr
+	}
+
+	allpagecount, err := Spacemodel.PageCount(spaces.DB)
+
+	if err != nil {
+
+		return 0, 0, err
+	}
+
+	Newpagecount, err := Spacemodel.NewpageCount(spaces.DB)
+
+	if err != nil {
+
+		return 0, 0, err
+	}
+
+	return int(allpagecount), int(Newpagecount), nil
+
 }

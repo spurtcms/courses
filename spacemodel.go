@@ -2,6 +2,7 @@ package spaces
 
 import (
 	"gorm.io/gorm"
+	"time"
 )
 
 /*spaceList*/
@@ -165,4 +166,53 @@ func (SpaceModel) DeleteSpace(tblspace *TblSpaces, id int, DB *gorm.DB) error {
 	}
 
 	return nil
+}
+
+func (SpaceModel) PageCount(DB *gorm.DB) (count int64, err error) {
+	if err := DB.Table("tbl_page_aliases").Where("is_deleted = 0").Count(&count).Error; err != nil {
+
+		return 0, err
+	}
+
+	return count, nil
+}
+
+func (SpaceModel) NewpageCount(DB *gorm.DB) (count int64, err error) {
+
+	if err := DB.Table("tbl_page_aliases").Where("is_deleted = 0 AND created_on >=?", time.Now().AddDate(0, 0, -10)).Count(&count).Error; err != nil {
+
+		return 0, err
+	}
+
+	return count, nil
+}
+
+// Mostlyviewed List//
+
+func (SpaceModel) MostlyViewList(Space *[]Tblspacesaliases, limit int, DB *gorm.DB) (err error) {
+
+	query := DB.Table("tbl_spaces_aliases").Select("tbl_spaces_aliases.*,tbl_spaces.page_category_id,tbl_categories.parent_id").
+		Joins("inner join tbl_spaces on tbl_spaces_aliases.spaces_id = tbl_spaces.id").
+		Joins("inner join tbl_languages on tbl_languages.id = tbl_spaces_aliases.language_id").
+		Joins("inner join tbl_categories on tbl_categories.id = tbl_spaces.page_category_id").
+		Where("tbl_spaces.is_deleted = 0 and tbl_spaces_aliases.is_deleted = 0 and tbl_spaces_aliases.language_id = 1 and tbl_spaces_aliases.view_count!=0").Order("tbl_spaces_aliases.view_count desc").Limit(limit)
+
+	query.Find(&Space)
+
+	return nil
+
+}
+
+func (SpaceModel) RecentlyViewList(Space *[]Tblspacesaliases, limit int, DB *gorm.DB) (err error) {
+
+	query := DB.Table("tbl_spaces_aliases").Select("tbl_spaces_aliases.*,tbl_spaces.page_category_id,tbl_categories.parent_id").
+		Joins("inner join tbl_spaces on tbl_spaces_aliases.spaces_id = tbl_spaces.id").
+		Joins("inner join tbl_languages on tbl_languages.id = tbl_spaces_aliases.language_id").
+		Joins("inner join tbl_categories on tbl_categories.id = tbl_spaces.page_category_id").
+		Where("tbl_spaces.is_deleted = 0 and tbl_spaces_aliases.is_deleted = 0 and tbl_spaces_aliases.language_id = 1 and tbl_spaces_aliases.view_count!=0").Order("tbl_spaces_aliases.recent_time desc").Limit(limit)
+
+	query.Find(&Space)
+
+	return nil
+
 }

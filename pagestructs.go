@@ -6,6 +6,13 @@ import (
 	"gorm.io/datatypes"
 )
 
+type MetaDetails struct {
+	MetaTitle       string
+	MetaDescription string
+	Keywords        string
+	Slug            string
+}
+
 type Tblpagesgroup struct {
 	Id         int       `gorm:"primaryKey;auto_increment"`
 	SpacesId   int       `gorm:"type:integer"`
@@ -188,4 +195,69 @@ type GetPageReq struct {
 	PublishedPageonly bool
 	ContentHideonly   bool //if you want hide content only , memberaccess enable true otherwise it doesn't fetch the page
 	MemberId          int
+}
+
+type TblPagesGroup struct {
+	Id         int
+	SpacesId   int
+	CreatedOn  time.Time
+	CreatedBy  int
+	ModifiedOn time.Time
+	ModifiedBy int
+	DeletedOn  time.Time
+	DeletedBy  int
+	IsDeleted  int
+}
+type TblPagesGroupAliases struct {
+	Id               int
+	PageGroupId      int
+	LanguageId       int
+	GroupName        string
+	GroupSlug        string
+	GroupDescription string
+	CreatedOn        time.Time
+	CreatedBy        int
+	ModifiedOn       time.Time
+	ModifiedBy       int
+	DeletedOn        time.Time
+	DeletedBy        int
+	IsDeleted        int
+	OrderIndex       int
+}
+type TblPage struct {
+	Id          int
+	SpacesId    int
+	PageGroupId int
+	ParentId    int
+	CreatedOn   time.Time
+	CreatedBy   int
+	ModifiedOn  time.Time
+	ModifiedBy  int
+	DeletedOn   time.Time
+	DeletedBy   int
+	IsDeleted   int
+}
+
+type TblPageAliasesLog struct {
+	Id              int
+	PageId          int
+	LanguageId      int
+	PageTitle       string
+	PageSlug        string
+	PageDescription string
+	PublishedOn     time.Time
+	Author          string
+	Excerpt         string
+	FeaturedImages  string
+	Access          string
+	MetaDetails     datatypes.JSONMap
+	Status          string
+	AllowComments   bool
+	CreatedOn       time.Time
+	CreatedBy       int
+	ModifiedOn      time.Time
+	ModifiedBy      int
+	DeletedOn       time.Time
+	DeletedBy       int
+	ReadTime        int
 }
