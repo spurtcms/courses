@@ -40,7 +40,7 @@ func (spaces *Spaces) SpaceList(spacelistreq SpaceListReq) (tblspace []Tblspaces
 	for _, space := range spacess {
 
 		child_page, _ := categories.Categorymodel.GetCategoryById(space.PageCategoryId, spaces.DB)
-		var categorynames []categories.Tblcategories
+		var categorynames []categories.TblCategories
 
 		var flg int
 
@@ -77,7 +77,7 @@ func (spaces *Spaces) SpaceList(spacelistreq SpaceListReq) (tblspace []Tblspaces
 
 		}
 
-		var reverseCategoryOrder []categories.Tblcategories
+		var reverseCategoryOrder []categories.TblCategories
 		for i := len(categorynames) - 1; i >= 0; i-- {
 			reverseCategoryOrder = append(reverseCategoryOrder, categorynames[i])
 

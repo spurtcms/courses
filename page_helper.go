@@ -255,7 +255,7 @@ func (s *Spaces) MostlyViewList(limit int) (spacedetails []Tblspacesaliases, err
 	for _, space := range spaces {
 
 		child_page, _ := categories.Categorymodel.GetCategoryById(space.PageCategoryId, s.DB)
-		var categorynames []categories.Tblcategories
+		var categorynames []categories.TblCategories
 
 		var flg int
 
@@ -292,7 +292,7 @@ func (s *Spaces) MostlyViewList(limit int) (spacedetails []Tblspacesaliases, err
 
 		}
 
-		var reverseCategoryOrder []categories.Tblcategories
+		var reverseCategoryOrder []categories.TblCategories
 		for i := len(categorynames) - 1; i >= 0; i-- {
 			reverseCategoryOrder = append(reverseCategoryOrder, categorynames[i])
 
@@ -323,7 +323,7 @@ func (s *Spaces) RecentlyViewList(limit int) (spacedetails []Tblspacesaliases, e
 	for _, space := range spaces {
 
 		child_page, _ := categories.Categorymodel.GetCategoryById(space.PageCategoryId, s.DB)
-		var categorynames []categories.Tblcategories
+		var categorynames []categories.TblCategories
 
 		var flg int
 
@@ -360,7 +360,7 @@ func (s *Spaces) RecentlyViewList(limit int) (spacedetails []Tblspacesaliases, e
 
 		}
 
-		var reverseCategoryOrder []categories.Tblcategories
+		var reverseCategoryOrder []categories.TblCategories
 		for i := len(categorynames) - 1; i >= 0; i-- {
 			reverseCategoryOrder = append(reverseCategoryOrder, categorynames[i])
 
