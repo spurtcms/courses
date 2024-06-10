@@ -30,7 +30,7 @@ func TestGetPages(t *testing.T) {
 
 	permisison, _ := Auth.IsGranted("Spaces", auth.CRUD)
 
-	space := SpaceSetup(&Config{
+	space := SpaceSetup(Config{
 		DB:               db,
 		AuthEnable:       true,
 		PermissionEnable: true,
@@ -61,7 +61,7 @@ func TestGetGroup(t *testing.T) {
 
 	db, _ := DBSetup()
 
-	space := SpaceSetup(&Config{
+	space := SpaceSetup(Config{
 		DB:               db,
 		AuthEnable:       false,
 		PermissionEnable: false,
@@ -80,7 +80,7 @@ func TestGetSubPages(t *testing.T) {
 
 	db, _ := DBSetup()
 
-	space := SpaceSetup(&Config{
+	space := SpaceSetup(Config{
 		DB:               db,
 		AuthEnable:       false,
 		PermissionEnable: false,
@@ -99,7 +99,7 @@ func TestPageAliasesLog(t *testing.T) {
 
 	db, _ := DBSetup()
 
-	space := SpaceSetup(&Config{
+	space := SpaceSetup(Config{
 		DB:               db,
 		AuthEnable:       false,
 		PermissionEnable: false,
@@ -118,7 +118,7 @@ func TestCreatePagelog(t *testing.T) {
 
 	db, _ := DBSetup()
 
-	space := SpaceSetup(&Config{
+	space := SpaceSetup(Config{
 		DB:               db,
 		AuthEnable:       false,
 		PermissionEnable: false,
@@ -140,7 +140,7 @@ func TestCreatePage(t *testing.T) {
 
 	db, _ := DBSetup()
 
-	space := SpaceSetup(&Config{
+	space := SpaceSetup(Config{
 		DB:               db,
 		AuthEnable:       false,
 		PermissionEnable: false,
@@ -162,7 +162,7 @@ func TestCreateGroup(t *testing.T) {
 
 	db, _ := DBSetup()
 
-	space := SpaceSetup(&Config{
+	space := SpaceSetup(Config{
 		DB:               db,
 		AuthEnable:       false,
 		PermissionEnable: false,
@@ -184,7 +184,7 @@ func TestCreateSubpage(t *testing.T) {
 
 	db, _ := DBSetup()
 
-	space := SpaceSetup(&Config{
+	space := SpaceSetup(Config{
 		DB:               db,
 		AuthEnable:       false,
 		PermissionEnable: false,
@@ -206,7 +206,7 @@ func TestUpdatePage(t *testing.T) {
 
 	db, _ := DBSetup()
 
-	space := SpaceSetup(&Config{
+	space := SpaceSetup(Config{
 		DB:               db,
 		AuthEnable:       false,
 		PermissionEnable: false,
@@ -228,7 +228,7 @@ func TestUpdateGroup(t *testing.T) {
 
 	db, _ := DBSetup()
 
-	space := SpaceSetup(&Config{
+	space := SpaceSetup(Config{
 		DB:               db,
 		AuthEnable:       false,
 		PermissionEnable: false,
@@ -250,7 +250,7 @@ func TestUpdateSubpage(t *testing.T) {
 
 	db, _ := DBSetup()
 
-	space := SpaceSetup(&Config{
+	space := SpaceSetup(Config{
 		DB:               db,
 		AuthEnable:       false,
 		PermissionEnable: false,
@@ -272,7 +272,7 @@ func TestDeletePage(t *testing.T) {
 
 	db, _ := DBSetup()
 
-	space := SpaceSetup(&Config{
+	space := SpaceSetup(Config{
 		DB:               db,
 		AuthEnable:       false,
 		PermissionEnable: false,
@@ -291,7 +291,7 @@ func TestDeletedPageGroup(t *testing.T) {
 
 	db, _ := DBSetup()
 
-	space := SpaceSetup(&Config{
+	space := SpaceSetup(Config{
 		DB:               db,
 		AuthEnable:       false,
 		PermissionEnable: false,
@@ -310,7 +310,7 @@ func TestDeleteSubPage(t *testing.T) {
 
 	db, _ := DBSetup()
 
-	space := SpaceSetup(&Config{
+	space := SpaceSetup(Config{
 		DB:               db,
 		AuthEnable:       false,
 		PermissionEnable: false,

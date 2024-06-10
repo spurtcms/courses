@@ -8,7 +8,7 @@ import (
 )
 
 // spacesetup
-func SpaceSetup(config *Config) *Spaces {
+func SpaceSetup(config Config) *Spaces {
 
 	migration.AutoMigration(config.DB, config.DataBaseType)
 

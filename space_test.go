@@ -67,7 +67,7 @@ func TestSpaceList(t *testing.T) {
 
 	log.Println("permisision",permisison,err)
 
-	space := SpaceSetup(&Config{
+	space := SpaceSetup(Config{
 		DB:               db,
 		AuthEnable:       true,
 		PermissionEnable: true,
@@ -98,7 +98,7 @@ func TestGetSpaceDetail(t *testing.T) {
 
 	db, _ := DBSetup()
 
-	space := SpaceSetup(&Config{
+	space := SpaceSetup(Config{
 		DB:               db,
 		AuthEnable:       false,
 		PermissionEnable: false,
@@ -120,7 +120,7 @@ func TestSpaceCreation(t *testing.T) {
 
 	db, _ := DBSetup()
 
-	space := SpaceSetup(&Config{
+	space := SpaceSetup(Config{
 		DB:               db,
 		AuthEnable:       false,
 		PermissionEnable: false,
@@ -141,7 +141,7 @@ func TestSpaceUpdate(t *testing.T) {
 
 	db, _ := DBSetup()
 
-	space := SpaceSetup(&Config{
+	space := SpaceSetup(Config{
 		DB:               db,
 		AuthEnable:       false,
 		PermissionEnable: false,
@@ -160,7 +160,7 @@ func TestDeleteSpace(t *testing.T) {
 
 	db, _ := DBSetup()
 
-	space := SpaceSetup(&Config{
+	space := SpaceSetup(Config{
 		DB:               db,
 		AuthEnable:       false,
 		PermissionEnable: false,
@@ -180,7 +180,7 @@ func TestCloneSpace(t *testing.T) {
 
 	db, _ := DBSetup()
 
-	space := SpaceSetup(&Config{
+	space := SpaceSetup(Config{
 		DB:               db,
 		AuthEnable:       false,
 		PermissionEnable: false,
