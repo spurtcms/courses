@@ -118,7 +118,7 @@ func (SpaceModel) PageAliases(page GetPageReq, DB *gorm.DB) (tblpage []Tblpageal
 
 	if page.Spaceid != 0 {
 
-		query = query.Where("tbl_pages.space_id = ?", page.Spaceid)
+		query = query.Where("tbl_pages.spaces_id = ?", page.Spaceid)
 
 	} else if len(page.PageIds) > 0 {
 
@@ -390,7 +390,7 @@ func (SpaceModel) CreatePage(tblpage *TblPage, DB *gorm.DB) (*TblPage, error) {
 }
 
 // create PageAliases
-func (SpaceModel) CreatepageAliases(tblpageAliases *TblPageAliases, DB *gorm.DB) (TblPageAliases, error) {
+func (SpaceModel) CreatepageAliases(tblpageAliases *Tblpagealiases, DB *gorm.DB) (Tblpagealiases, error) {
 
 	if err := DB.Table("tbl_page_aliases").Create(&tblpageAliases).Error; err != nil {
 

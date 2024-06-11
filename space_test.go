@@ -186,7 +186,7 @@ func TestCloneSpace(t *testing.T) {
 		PermissionEnable: false,
 	})
 
-	spacedata,err := space.CloneSpace(1,1)
+	spacedata,err := space.CloneSpace(SpaceCreation{},1,1)
 
 	if err != nil {
 

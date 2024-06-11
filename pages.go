@@ -169,15 +169,15 @@ func (spaces *Spaces) CreatePagelog(spaceid int, NewPages []Pages, Status string
 }
 
 // create page
-func (spaces *Spaces) CreatePage(SpaceId int, NewPages []Pages, Status string) ([]TblPageAliases, error) {
+func (spaces *Spaces) CreatePage(SpaceId int, NewPages []Pages, Status string) ([]Tblpagealiases, error) {
 
 	autherr := AuthandPermission(spaces)
 	if autherr != nil {
 
-		return []TblPageAliases{}, autherr
+		return []Tblpagealiases{}, autherr
 	}
 
-	var pagealis []TblPageAliases
+	var pagealis []Tblpagealiases
 	/*Create Pages*/
 	for _, val := range NewPages {
 
@@ -192,7 +192,7 @@ func (spaces *Spaces) CreatePage(SpaceId int, NewPages []Pages, Status string) (
 		pageret, _ := Spacemodel.CreatePage(&page, spaces.DB)
 
 		/*page creation tbl_page_aliases*/
-		var pageali TblPageAliases
+		var pageali Tblpagealiases
 		pageali.LanguageId = 1
 		pageali.PageId = pageret.Id
 		pageali.PageTitle = val.Title
@@ -257,9 +257,9 @@ func (spaces *Spaces) CreateGroup(SpaceId int, NewGroup []PageGroups, CreatedBy 
 }
 
 // create subpage
-func (spaces *Spaces) CreateSubpage(SpaceId int, NewSubPage []SubPages) ([]TblPageAliases, error) {
+func (spaces *Spaces) CreateSubpage(SpaceId int, NewSubPage []SubPages) ([]Tblpagealiases, error) {
 
-	var subpgs []TblPageAliases
+	var subpgs []Tblpagealiases
 	/*createsub*/
 	for _, val := range NewSubPage {
 
@@ -273,7 +273,7 @@ func (spaces *Spaces) CreateSubpage(SpaceId int, NewSubPage []SubPages) ([]TblPa
 		pageret, _ := Spacemodel.CreatePage(&page, spaces.DB)
 
 		/*page creation tbl_page_aliases*/
-		var pageali TblPageAliases
+		var pageali Tblpagealiases
 		pageali.LanguageId = 1
 		pageali.PageId = pageret.Id
 		pageali.PageTitle = val.Title

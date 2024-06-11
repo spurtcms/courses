@@ -1,8 +1,9 @@
 package spaces
 
 import (
-	"gorm.io/gorm"
 	"time"
+
+	"gorm.io/gorm"
 )
 
 /*spaceList*/
@@ -39,7 +40,7 @@ func (SpaceModel) SpaceList(spacereq SpaceListReq, spaceid []int, DB *gorm.DB) (
 
 	if spacereq.Keyword != "" {
 
-		query = query.Where("LOWER(TRIM(tbl_spaces_aliases.spaces_name)) ILIKE LOWER(TRIM(?))", "%"+spacereq.Keyword+"%")
+		query = query.Where("LOWER(TRIM(tbl_spaces_aliases.spaces_name)) LIKE LOWER(TRIM(?))", "%"+spacereq.Keyword+"%")
 	}
 	if spacereq.CategoryId > 0 && spacereq.CategoryId != 0 {
 
@@ -215,4 +216,114 @@ func (SpaceModel) RecentlyViewList(Space *[]Tblspacesaliases, limit int, DB *gor
 
 	return nil
 
+}
+
+// Name already exists
+func (SpaceModel) CheckSpaceName(space *Tblspacesaliases, userid int, name string, DB *gorm.DB) error {
+
+	if userid == 0 {
+
+		if err := DB.Table("tbl_spaces_aliases").Where("LOWER(TRIM(spaces_name))=LOWER(TRIM(?)) and is_deleted=0", name).First(&space).Error; err != nil {
+
+			return err
+		}
+	} else {
+
+		if err := DB.Table("tbl_spaces_aliases").Where("LOWER(TRIM(spaces_name))=LOWER(TRIM(?)) and spaces_id not in (?) and is_deleted=0", name, userid).First(&space).Error; err != nil {
+
+			return err
+		}
+	}
+
+	return nil
+}
+func (SpaceModel) GetPageGroupData(group *[]TblPagesGroupAliases, id int, DB *gorm.DB) error {
+
+	if err := DB.Table("tbl_pages_group_aliases").Joins("inner join tbl_pages_groups on tbl_pages_group_aliases.page_group_id = tbl_pages_groups.id").Where("tbl_pages_groups.is_deleted = ? and tbl_pages_group_aliases.is_deleted = ? and tbl_pages_groups.spaces_id = ?", 0, 0, id).Find(&group).Error; err != nil {
+
+		return err
+
+	}
+
+	return nil
+
+}
+func (SpaceModel) GetPageInPage(pageid *[]Tblpagealiases, spaceid int, DB *gorm.DB) error {
+
+	if err := DB.Table("tbl_page_aliases").Select("tbl_page_aliases.*").Joins("inner join tbl_pages on tbl_page_aliases.page_id = tbl_pages.id").Where("tbl_pages.is_deleted = ? and tbl_page_aliases.is_deleted = ? and tbl_pages.page_group_id = ? and  parent_id = ? and  tbl_pages.spaces_id = ?", 0, 0, 0, 0, spaceid).Find(&pageid).Error; err != nil {
+
+		return err
+
+	}
+
+	return nil
+}
+func (SpaceModel) GetIdInPage(pageid *TblPagesGroupAliases, spaceid int, DB *gorm.DB) error {
+
+	if err := DB.Table("tbl_pages_group_aliases").Joins("inner join tbl_pages on tbl_pages_group_aliases.page_group_id = tbl_pages.page_group_id").Where("tbl_pages.is_deleted = ? and tbl_pages_group_aliases.is_deleted = ? and tbl_pages.page_group_id != ? and  tbl_pages.parent_id = ? and  tbl_pages.spaces_id = ?", 0, 0, 0, 0, spaceid).First(&pageid).Error; err != nil {
+		return err
+
+	}
+
+	return nil
+}
+func (SpaceModel) GetPageAliasesInPage(data *[]Tblpagealiases, spacid int, DB *gorm.DB) error {
+
+	if err := DB.Table("tbl_page_aliases").Select("tbl_page_aliases.*,tbl_pages.parent_id,tbl_pages.page_group_id,tbl_pages.spaces_id").Joins("inner join tbl_pages on tbl_page_aliases.page_id = tbl_pages.id").Where("tbl_page_aliases.is_deleted = ? and tbl_pages.is_deleted = ? and tbl_pages.page_group_id != ? and  tbl_pages.parent_id = ? and  tbl_pages.spaces_id = ?", 0, 0, 0, 0, spacid).Find(&data).Error; err != nil {
+
+		return err
+
+	}
+
+	return nil
+}
+func (SpaceModel) GetDetailsInPageAli(pagedetails *TblPagesGroupAliases, groupname string, spaceid int, DB *gorm.DB) error {
+
+	if err := DB.Table("tbl_pages_group_aliases").Joins("inner join tbl_pages_groups on tbl_pages_group_aliases.page_group_id = tbl_pages_groups.id").Where("tbl_pages_groups.is_deleted = ? and  tbl_pages_group_aliases.is_deleted = ? and  tbl_pages_group_aliases.group_name = ? and tbl_pages_groups.spaces_id = ? ", 0, 0, groupname, spaceid).Find(&pagedetails).Error; err != nil {
+
+		return err
+
+	}
+
+	return nil
+}
+func (SpaceModel) GetPageAliasesInPageData(result *[]Tblpagealiases, spacid int, DB *gorm.DB) error {
+
+	if err := DB.Table("tbl_page_aliases").Select("tbl_page_aliases.*,tbl_pages.page_group_id,tbl_pages.parent_id").Joins("inner join tbl_pages on tbl_page_aliases.page_id = tbl_pages.id").Where("tbl_pages.parent_id != ? and  tbl_pages.spaces_id = ?", 0, spacid).Find(&result).Error; err != nil {
+
+		return err
+
+	}
+
+	return nil
+}
+func (SpaceModel) GetDetailsInPageAlia(pageid *TblPagesGroupAliases, pagegroupid int, spaceid int, DB *gorm.DB) error {
+
+	if err := DB.Table("tbl_pages_group_aliases").Joins("inner join tbl_pages_groups on tbl_pages_group_aliases.page_group_id = tbl_pages_groups.id").Where("tbl_pages_group_aliases.page_group_id = ? and  tbl_pages_groups.spaces_id = ?", pagegroupid, spaceid).First(&pageid).Error; err != nil {
+
+		return err
+
+	}
+
+	return nil
+}
+func (SpaceModel) AliasesInParentId(data *TblPageAliases, parentid int, spacid int, DB *gorm.DB) error {
+
+	if err := DB.Table("tbl_page_aliases").Select("tbl_page_aliases.*,tbl_pages.id,tbl_pages.parent_id").Joins("inner join tbl_pages on tbl_page_aliases.page_id = tbl_pages.id").Where("tbl_page_aliases.page_id = ? and  tbl_pages.spaces_id = ?", parentid, spacid).First(&data).Error; err != nil {
+
+		return err
+
+	}
+
+	return nil
+}
+func (SpaceModel) LastLoopAliasesInPage(data *TblPageAliases, pagetitle string, spacid int, DB *gorm.DB) error {
+
+	if err := DB.Table("tbl_page_aliases").Select("tbl_page_aliases.*").Joins("inner join tbl_pages on tbl_page_aliases.page_id = tbl_pages.id").Where("tbl_page_aliases.page_title = ? and  tbl_pages.spaces_id = ?", pagetitle, spacid).First(&data).Error; err != nil {
+
+		return err
+
+	}
+
+	return nil
 }

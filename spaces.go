@@ -1,8 +1,10 @@
 package spaces
 
 import (
-	"github.com/spurtcms/courses/migration"
 	"strings"
+	"time"
+
+	"github.com/spurtcms/courses/migration"
 
 	"github.com/spurtcms/categories"
 )
@@ -235,43 +237,131 @@ func (spaces *Spaces) DeleteSpace(spaceid int, deletedBy int) error {
 }
 
 // clone space - func helps to create duplicate space, using given space id
-func (spaces *Spaces) CloneSpace(spaceid int, createdBy int) (Tblspacesaliases, error) {
+func (spaces *Spaces) CloneSpace(createspace SpaceCreation, spaceid int, createdBy int) (Tblspacesaliases, error) {
 
 	autherr := AuthandPermission(spaces)
-
 	if autherr != nil {
-
 		return Tblspacesaliases{}, autherr
 	}
 
 	space, err := spaces.SpaceDetail(SpaceDetail{SpaceId: spaceid})
 	if err != nil {
-
 		return Tblspacesaliases{}, err
 
 	}
 
 	var cspace tblspaces
-	cspace.PageCategoryId = space.PageCategoryId
+	cspace.PageCategoryId = createspace.CategoryId
 	cspace.CreatedBy = createdBy
 	cspace.CreatedOn = CurrentTime
-	latestspace, serr := Spacemodel.CreateSpace(cspace, spaces.DB)
-
+	tblspaces, serr := Spacemodel.CreateSpace(cspace, spaces.DB)
 	if serr != nil {
-
 		return Tblspacesaliases{}, serr
 	}
 
 	var cspaceali Tblspacesaliases
-	cspaceali.CategoryId = space.PageCategoryId
-	cspaceali.SpacesId = latestspace.Id
-	cspaceali.SpacesName = space.SpacesName
+	cspaceali.CategoryId = createspace.CategoryId
+	cspaceali.SpacesId = tblspaces.Id
+	cspaceali.SpacesName = createspace.Name
 	cspaceali.SpacesSlug, _ = CreateSlug(space.SpacesName)
 	cspaceali.SpacesDescription = space.SpacesDescription
 	cspaceali.CreatedBy = createdBy
+	cspaceali.LanguageId = space.LanguageId
 	cspaceali.CreatedOn = CurrentTime
 	spacealise, err := Spacemodel.CreateSpaceAliase(cspaceali, spaces.DB)
 
+	var pagegroupdata []TblPagesGroupAliases
+	Spacemodel.GetPageGroupData(&pagegroupdata, spaceid, spaces.DB)
+
+	for _, value := range pagegroupdata {
+
+		var group TblPagesGroup
+		group.SpacesId = tblspaces.Id
+		group.CreatedOn, _ = time.Parse("2006-01-02 15:04:05", time.Now().UTC().Format("2006-01-02 15:04:05"))
+		groups, _ := Spacemodel.CreatePageGroup(&group, spaces.DB)
+		pagegroup := value
+		pagegroup.PageGroupId = groups.Id
+		pagegroup.CreatedOn, _ = time.Parse("2006-01-02 15:04:05", time.Now().UTC().Format("2006-01-02 15:04:05"))
+		Spacemodel.CreatePageGroupAliases(&pagegroup, spaces.DB)
+	}
+
+	var pageId []Tblpagealiases
+	Spacemodel.GetPageInPage(&pageId, spaceid, spaces.DB) //parentid 0 and groupid 0
+
+	for _, val := range pageId {
+		var page TblPage
+		page.SpacesId = tblspaces.Id
+		page.PageGroupId = 0
+		page.ParentId = 0
+		page.CreatedOn, _ = time.Parse("2006-01-02 15:04:05", time.Now().UTC().Format("2006-01-02 15:04:05"))
+		pageid, _ := Spacemodel.CreatePage(&page, spaces.DB)
+
+		// var pagesali TblPageAliases
+		pagesali := val
+		pagesali.PageId = pageid.Id
+		pagesali.CreatedOn, _ = time.Parse("2006-01-02 15:04:05", time.Now().UTC().Format("2006-01-02 15:04:05"))
+		Spacemodel.CreatepageAliases(&pagesali, spaces.DB)
+
+	}
+
+	var pagegroupaldata TblPagesGroupAliases
+	Spacemodel.GetIdInPage(&pagegroupaldata, spaceid, spaces.DB) // parentid = 0 and groupid != 0
+
+	var pagealiase []Tblpagealiases
+	Spacemodel.GetPageAliasesInPage(&pagealiase, spaceid, spaces.DB) // parentid = 0 and groupid != 0
+
+	for _, value := range pagealiase {
+		var pageal TblPagesGroupAliases
+		Spacemodel.GetDetailsInPageAli(&pageal, pagegroupaldata.GroupName, tblspaces.Id, spaces.DB)
+		var page TblPage
+		page.SpacesId = tblspaces.Id
+		page.PageGroupId = pageal.PageGroupId
+		page.ParentId = 0
+		page.CreatedOn, _ = time.Parse("2006-01-02 15:04:05", time.Now().UTC().Format("2006-01-02 15:04:05"))
+		pagess, _ := Spacemodel.CreatePage(&page, spaces.DB)
+
+		// var pagesali TblPageAliases
+		pagesali := value
+		pagesali.PageId = pagess.Id
+		pagesali.CreatedOn, _ = time.Parse("2006-01-02 15:04:05", time.Now().UTC().Format("2006-01-02 15:04:05"))
+		Spacemodel.CreatepageAliases(&pagesali, spaces.DB)
+
+	}
+
+	var pagealiasedata []Tblpagealiases
+	Spacemodel.GetPageAliasesInPageData(&pagealiasedata, spaceid, spaces.DB) // parentid != 0 and groupid = 0
+
+	for _, result := range pagealiasedata {
+
+		var newgroupid int
+		if result.PageGroupId != 0 {
+			var pagesgroupal TblPagesGroupAliases
+			Spacemodel.GetDetailsInPageAlia(&pagesgroupal, result.PageGroupId, spaceid, spaces.DB) // parentid != 0 and groupid = 0
+			var pageal TblPagesGroupAliases
+			Spacemodel.GetDetailsInPageAli(&pageal, pagesgroupal.GroupName, tblspaces.Id, spaces.DB)
+			newgroupid = pageal.PageGroupId
+
+		}
+
+		var pagealid TblPageAliases
+		Spacemodel.AliasesInParentId(&pagealid, result.ParentId, spaceid, spaces.DB)
+
+		var pageali TblPageAliases
+		Spacemodel.LastLoopAliasesInPage(&pageali, pagealid.PageTitle, tblspaces.Id, spaces.DB)
+
+		var page TblPage
+		page.SpacesId = tblspaces.Id
+		page.PageGroupId = newgroupid
+		page.ParentId = pageali.PageId
+		page.CreatedOn, _ = time.Parse("2006-01-02 15:04:05", time.Now().UTC().Format("2006-01-02 15:04:05"))
+		pagealiid, _ := Spacemodel.CreatePage(&page, spaces.DB)
+
+		// var pagesali TblPageAliases
+		pagesali := result
+		pagesali.PageId = pagealiid.Id
+		Spacemodel.CreatepageAliases(&pagesali, spaces.DB)
+
+	}
 	return spacealise, err
 }
 
@@ -301,4 +391,19 @@ func (spaces *Spaces) DashboardPagesCount() (totalcount int, lasttendayscount in
 
 	return int(allpagecount), int(Newpagecount), nil
 
+}
+
+// Check Name is already exits or not
+func (spaces *Spaces) CheckSpaceName(id int, name string) (bool, error) {
+
+	var space Tblspacesaliases
+
+	err := Spacemodel.CheckSpaceName(&space, id, name, spaces.DB)
+
+	if err != nil {
+
+		return false, err
+	}
+
+	return true, nil
 }
