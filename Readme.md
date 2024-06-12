@@ -1,7 +1,7 @@
 
-# Courses Package
+# Learning Package
 
-With 'courses' package, experience an organized content creation process that allows effortless organization of content presentation on your website. Customize specific areas like the header, footer, or dedicated sections for different content types.  This package will empower you to create a structured website in Golang, with layout tailored to diverse content presentations, ensuring seamless content management with distinct layouts and specialized sections for an enhanced user experience
+With 'learning' package, experience an organized content creation process that allows effortless organization of content presentation on your website. Customize specific areas like the header, footer, or dedicated sections for different content types.  This package will empower you to create a structured website in Golang, with layout tailored to diverse content presentations, ensuring seamless content management with distinct layouts and specialized sections for an enhanced user experience
 
 ## Features
 
@@ -17,7 +17,7 @@ With 'courses' package, experience an organized content creation process that al
 # Installation
 
 ``` bash
-go get github.com/spurtcms/courses
+go get github.com/spurtcms/Learning
 ```
 
 
@@ -26,7 +26,7 @@ go get github.com/spurtcms/courses
 ``` bash
 import (
 	"github.com/spurtcms/auth"
-	"github.com/spurtcms/courses"
+	"github.com/spurtcms/Learning"
 )
 
 func main() {
@@ -129,4 +129,4 @@ func main() {
 ```
 
 # Getting help
-If you encounter a problem with the package,please refer [Please refer [(https://www.spurtcms.com/documentation/cms-admin)] or you can create a new Issue in this repo[https://github.com/spurtcms/courses/issues]. 
+If you encounter a problem with the package,please refer [Please refer [(https://www.spurtcms.com/documentation/cms-admin)] or you can create a new Issue in this repo[https://github.com/spurtcms/learning/issues]. 
