@@ -2,6 +2,7 @@ package spaces
 
 import (
 	"fmt"
+
 	"github.com/spurtcms/categories"
 	"gorm.io/gorm"
 )
@@ -52,20 +53,21 @@ func GetPageBySpaceIdORPageIds(pagereq GetPageReq, DB *gorm.DB) ([]Pages, error)
 
 	page_aliases, _, _ := Spacemodel.PageAliases(pagereq, DB)
 	for _, val := range page_aliases {
+		if val.ParentId == 0 {
+			one_page.PageId = val.PageId
+			one_page.Name = val.PageTitle
+			one_page.Content = val.PageDescription
+			one_page.OrderIndex = val.OrderIndex
+			one_page.Pgroupid = val.PageGroupId
+			one_page.ParentId = val.ParentId
+			one_page.CreatedDate = val.CreatedOn
+			one_page.LastUpdate = val.ModifiedOn
+			one_page.Username = val.Username
+			one_page.ReadTime = val.ReadTime
+			one_page.Log = finallog
 
-		one_page.PageId = val.PageId
-		one_page.Title = val.PageTitle
-		one_page.Content = val.PageDescription
-		one_page.OrderIndex = val.OrderIndex
-		one_page.Pgroupid = val.PageGroupId
-		one_page.ParentId = val.ParentId
-		one_page.CreatedDate = val.CreatedOn
-		one_page.LastUpdate = val.ModifiedOn
-		one_page.Username = val.Username
-		one_page.ReadTime = val.ReadTime
-		one_page.Log = finallog
-
-		pages = append(pages, one_page)
+			pages = append(pages, one_page)
+		}
 	}
 
 	return pages, nil
@@ -112,7 +114,7 @@ func GetPageByPageId(pagereq GetPageReq, DB *gorm.DB) (Pages, error) {
 	var one_page Pages
 	_, page_aliases, _ := Spacemodel.PageAliases(pagereq, DB)
 	one_page.PageId = page_aliases.PageId
-	one_page.Title = page_aliases.PageTitle
+	one_page.Name = page_aliases.PageTitle
 	one_page.Content = page_aliases.PageDescription
 	one_page.OrderIndex = page_aliases.OrderIndex
 	one_page.Pgroupid = page_aliases.PageGroupId
@@ -172,17 +174,19 @@ func GetSubPageBySpaceIdORPageIds(pagereq GetPageReq, DB *gorm.DB) ([]SubPages, 
 	page_aliases, _, _ := Spacemodel.PageAliases(pagereq, DB)
 
 	for _, val := range page_aliases {
-		subpage.SubPageId = val.PageId
-		subpage.Title = val.PageTitle
-		subpage.Content = val.PageDescription
-		subpage.ParentId = val.ParentId
-		subpage.OrderIndex = val.PageSuborder
-		subpage.CreatedDate = val.CreatedOn
-		subpage.LastUpdate = val.ModifiedOn
-		subpage.Username = val.Username
-		subpage.ReadTime = val.ReadTime
-		subpage.Log = finallog
-		subpages = append(subpages, subpage)
+		if val.ParentId != 0 {
+			subpage.SubPageId = val.PageId
+			subpage.Name = val.PageTitle
+			subpage.Content = val.PageDescription
+			subpage.ParentId = val.ParentId
+			subpage.OrderIndex = val.PageSuborder
+			subpage.CreatedDate = val.CreatedOn
+			subpage.LastUpdate = val.ModifiedOn
+			subpage.Username = val.Username
+			subpage.ReadTime = val.ReadTime
+			subpage.Log = finallog
+			subpages = append(subpages, subpage)
+		}
 	}
 
 	return subpages, nil
@@ -228,7 +232,7 @@ func GetSubPageByPageId(pagereq GetPageReq, DB *gorm.DB) (SubPages, error) {
 	var one_page SubPages
 	_, page_aliases, _ := Spacemodel.PageAliases(pagereq, DB)
 
-	one_page.Title = page_aliases.PageTitle
+	one_page.Name = page_aliases.PageTitle
 	one_page.Content = page_aliases.PageDescription
 	one_page.OrderIndex = page_aliases.OrderIndex
 	one_page.ParentId = page_aliases.ParentId

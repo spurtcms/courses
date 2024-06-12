@@ -9,7 +9,7 @@ import (
 /*spaceList*/
 func (SpaceModel) SpaceList(spacereq SpaceListReq, spaceid []int, DB *gorm.DB) (tblspace []Tblspacesaliases, spacecount int64, err error) {
 
-	query := DB.Model(TblSpacesAliases{}).Select("tbl_spaces_aliases.*,tbl_spaces.page_category_id,tbl_categories.parent_id").
+	query := DB.Table("tbl_spaces_aliases").Select("tbl_spaces_aliases.*,tbl_spaces.page_category_id,tbl_categories.parent_id").
 		Joins("inner join tbl_spaces on tbl_spaces_aliases.spaces_id = tbl_spaces.id").
 		Joins("inner join tbl_languages on tbl_languages.id = tbl_spaces_aliases.language_id").
 		Joins("inner join tbl_categories on tbl_categories.id = tbl_spaces.page_category_id").
@@ -64,7 +64,7 @@ func (SpaceModel) SpaceList(spacereq SpaceListReq, spaceid []int, DB *gorm.DB) (
 // get last update
 func (SpaceModel) GetLastUpdatePageAliases(tblpageali *TblPageAliases, spaceid int, DB *gorm.DB) error {
 
-	if err := DB.Model(TblPageAliases{}).Select("max(tbl_page_aliases.modified_on) as modified_on").Joins("inner join tbl_pages on tbl_pages.Id = tbl_page_aliases.page_id").Where("tbl_pages.spaces_Id=?", spaceid).Group("tbl_page_aliases.id").First(tblpageali).Error; err != nil {
+	if err := DB.Table("tbl_page_aliases").Select("max(tbl_page_aliases.modified_on) as modified_on").Joins("inner join tbl_pages on tbl_pages.Id = tbl_page_aliases.page_id").Where("tbl_pages.spaces_Id=?", spaceid).Group("tbl_page_aliases.id").First(tblpageali).Error; err != nil {
 		return err
 	}
 
@@ -73,7 +73,7 @@ func (SpaceModel) GetLastUpdatePageAliases(tblpageali *TblPageAliases, spaceid i
 
 func (SpaceModel) GetSpacealiaseDetails(spaceid int, spaceslug string, DB *gorm.DB) (TblSpacesAliase Tblspacesaliases, err error) {
 
-	query := DB.Model(TblSpacesAliases{}).First(&TblSpacesAliase)
+	query := DB.Table("tbl_spaces_aliases").First(&TblSpacesAliase)
 
 	if spaceid > 0 {
 
@@ -96,7 +96,7 @@ func (SpaceModel) GetSpacealiaseDetails(spaceid int, spaceslug string, DB *gorm.
 
 func (SpaceModel) GetSpaceDetails(id int, DB *gorm.DB) (tblspace tblspaces, err error) {
 
-	if err := DB.Model(TblSpaces{}).Select("tbl_spaces.created_on,tbl_spaces.modified_on,tbl_users.username").Where("tbl_spaces.id=?", id).Joins("inner join tbl_users on tbl_users.id = tbl_spaces.created_by").First(&tblspace).Error; err != nil {
+	if err := DB.Table("tbl_spaces").Select("tbl_spaces.created_on,tbl_spaces.modified_on,tbl_users.username").Where("tbl_spaces.id=?", id).Joins("inner join tbl_users on tbl_users.id = tbl_spaces.created_by").First(&tblspace).Error; err != nil {
 
 		return tblspaces{}, err
 	}
@@ -106,7 +106,7 @@ func (SpaceModel) GetSpaceDetails(id int, DB *gorm.DB) (tblspace tblspaces, err 
 
 func (SpaceModel) CreateSpace(tblspac tblspaces, DB *gorm.DB) (tblspace tblspaces, err error) {
 
-	if err := DB.Model(TblSpaces{}).Create(&tblspac).Error; err != nil {
+	if err := DB.Table("tbl_spaces").Create(&tblspac).Error; err != nil {
 
 		return tblspaces{}, err
 	}
@@ -116,7 +116,7 @@ func (SpaceModel) CreateSpace(tblspac tblspaces, DB *gorm.DB) (tblspace tblspace
 
 func (SpaceModel) CreateSpaceAliase(tblspac Tblspacesaliases, DB *gorm.DB) (tblspc Tblspacesaliases, err error) {
 
-	if err := DB.Model(TblSpacesAliases{}).Create(&tblspac).Error; err != nil {
+	if err := DB.Table("tbl_spaces_aliases").Create(&tblspac).Error; err != nil {
 
 		return Tblspacesaliases{}, err
 	}
@@ -127,7 +127,7 @@ func (SpaceModel) CreateSpaceAliase(tblspac Tblspacesaliases, DB *gorm.DB) (tbls
 /*Update Space*/
 func (SpaceModel) UpdateSpaceAliases(tblspace *Tblspacesaliases, id int, DB *gorm.DB) error {
 
-	DB.Model(TblSpacesAliases{}).Where("spaces_id = ?", tblspace.Id).UpdateColumns(map[string]interface{}{"spaces_name": tblspace.SpacesName, "spaces_description": tblspace.SpacesDescription, "spaces_slug": tblspace.SpacesSlug, "image_path": tblspace.ImagePath, "modified_by": tblspace.ModifiedBy, "modified_on": tblspace.ModifiedOn})
+	DB.Table("tbl_spaces_aliases").Where("spaces_id = ?", tblspace.Id).UpdateColumns(map[string]interface{}{"spaces_name": tblspace.SpacesName, "spaces_description": tblspace.SpacesDescription, "spaces_slug": tblspace.SpacesSlug, "image_path": tblspace.ImagePath, "modified_by": tblspace.ModifiedBy, "modified_on": tblspace.ModifiedOn})
 
 	return nil
 }
@@ -137,11 +137,11 @@ func (SpaceModel) UpdateSpace(tblspace *tblspaces, id int, DB *gorm.DB) error {
 
 	if tblspace.PageCategoryId != 0 {
 
-		DB.Model(TblSpaces{}).Where("id = ?", tblspace.Id).UpdateColumns(map[string]interface{}{"page_category_id": tblspace.PageCategoryId, "modified_by": tblspace.ModifiedBy, "modified_on": tblspace.ModifiedOn})
+		DB.Table("tbl_spaces").Where("id = ?", tblspace.Id).UpdateColumns(map[string]interface{}{"page_category_id": tblspace.PageCategoryId, "modified_by": tblspace.ModifiedBy, "modified_on": tblspace.ModifiedOn})
 
 	} else {
 
-		DB.Model(TblSpaces{}).Where("id = ?", tblspace.Id).UpdateColumns(map[string]interface{}{"modified_by": tblspace.ModifiedBy, "modified_on": tblspace.ModifiedOn})
+		DB.Table("tbl_spaces").Where("id = ?", tblspace.Id).UpdateColumns(map[string]interface{}{"modified_by": tblspace.ModifiedBy, "modified_on": tblspace.ModifiedOn})
 
 	}
 	return nil
@@ -150,7 +150,7 @@ func (SpaceModel) UpdateSpace(tblspace *tblspaces, id int, DB *gorm.DB) error {
 /*Deleted space*/
 func (SpaceModel) DeleteSpaceAliases(tblspace *TblSpacesAliases, id int, DB *gorm.DB) error {
 
-	if err := DB.Model(TblSpacesAliases{}).Where("spaces_id = ?", id).UpdateColumns(map[string]interface{}{"deleted_by": tblspace.DeletedBy, "deleted_on": tblspace.DeletedOn, "is_deleted": tblspace.IsDeleted}).Error; err != nil {
+	if err := DB.Table("tbl_spaces_aliases").Where("spaces_id = ?", id).UpdateColumns(map[string]interface{}{"deleted_by": tblspace.DeletedBy, "deleted_on": tblspace.DeletedOn, "is_deleted": tblspace.IsDeleted}).Error; err != nil {
 
 		return err
 	}
@@ -161,7 +161,7 @@ func (SpaceModel) DeleteSpaceAliases(tblspace *TblSpacesAliases, id int, DB *gor
 /*Deleted space*/
 func (SpaceModel) DeleteSpace(tblspace *TblSpaces, id int, DB *gorm.DB) error {
 
-	if err := DB.Model(TblSpaces{}).Where("id = ?", id).UpdateColumns(map[string]interface{}{"deleted_by": tblspace.DeletedBy, "deleted_on": tblspace.DeletedOn, "is_deleted": tblspace.IsDeleted}).Error; err != nil {
+	if err := DB.Table("tbl_spaces").Where("id = ?", id).UpdateColumns(map[string]interface{}{"deleted_by": tblspace.DeletedBy, "deleted_on": tblspace.DeletedOn, "is_deleted": tblspace.IsDeleted}).Error; err != nil {
 
 		return err
 	}

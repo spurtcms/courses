@@ -146,8 +146,8 @@ func (spaces *Spaces) CreatePagelog(spaceid int, NewPages []Pages, Status string
 		var pagelog TblPageAliasesLog
 		pagelog.PageId = val.PageId
 		pagelog.LanguageId = 1
-		pagelog.PageTitle = val.Title
-		pagelog.PageSlug = strings.ToLower(strings.ReplaceAll(val.Title, " ", "_"))
+		pagelog.PageTitle = val.Name
+		pagelog.PageSlug = strings.ToLower(strings.ReplaceAll(val.Name, " ", "_"))
 		pagelog.PageDescription = val.Content
 		pagelog.PageId = val.PageId
 		pagelog.CreatedOn, _ = time.Parse("2006-01-02 15:04:05", time.Now().UTC().Format("2006-01-02 15:04:05"))
@@ -195,9 +195,9 @@ func (spaces *Spaces) CreatePage(SpaceId int, NewPages []Pages, Status string) (
 		var pageali Tblpagealiases
 		pageali.LanguageId = 1
 		pageali.PageId = pageret.Id
-		pageali.PageTitle = val.Title
+		pageali.PageTitle = val.Name
 		pageali.PageDescription = val.Content
-		pageali.PageSlug = strings.ToLower(strings.ReplaceAll(val.Title, " ", "_"))
+		pageali.PageSlug = strings.ToLower(strings.ReplaceAll(val.Name, " ", "_"))
 		pageali.CreatedOn, _ = time.Parse("2006-01-02 15:04:05", time.Now().UTC().Format("2006-01-02 15:04:05"))
 		pageali.CreatedBy = val.CreatedBy
 		pageali.OrderIndex = val.OrderIndex
@@ -276,9 +276,9 @@ func (spaces *Spaces) CreateSubpage(SpaceId int, NewSubPage []SubPages) ([]Tblpa
 		var pageali Tblpagealiases
 		pageali.LanguageId = 1
 		pageali.PageId = pageret.Id
-		pageali.PageTitle = val.Title
+		pageali.PageTitle = val.Name
 		pageali.PageDescription = val.Content
-		pageali.PageSlug = strings.ToLower(strings.ReplaceAll(val.Title, " ", "_"))
+		pageali.PageSlug = strings.ToLower(strings.ReplaceAll(val.Name, " ", "_"))
 		pageali.CreatedOn, _ = time.Parse("2006-01-02 15:04:05", time.Now().UTC().Format("2006-01-02 15:04:05"))
 		pageali.CreatedBy = val.CreatedBy
 		pageali.PageSuborder = val.OrderIndex
@@ -315,8 +315,8 @@ func (spaces *Spaces) UpdatePage(SpaceId int, UpdatePages []Pages) ([]TblPageAli
 		Spacemodel.UpdatePage(&uptpage, val.PageId, spaces.DB)
 
 		var uptpageali TblPageAliases
-		uptpageali.PageTitle = val.Title
-		uptpageali.PageSlug = strings.ToLower(strings.ReplaceAll(val.Title, " ", "_"))
+		uptpageali.PageTitle = val.Name
+		uptpageali.PageSlug = strings.ToLower(strings.ReplaceAll(val.Name, " ", "_"))
 		uptpageali.PageDescription = val.Content
 		uptpageali.OrderIndex = val.OrderIndex
 		uptpageali.Status = val.Status
@@ -380,8 +380,8 @@ func (spaces *Spaces) UpdateSubpage(SpaceId int, UpdateSubPage []SubPages) ([]Tb
 		Spacemodel.UpdatePage(&uptpage, val.SubPageId, spaces.DB)
 
 		var uptpageali TblPageAliases
-		uptpageali.PageTitle = val.Title
-		uptpageali.PageSlug = strings.ToLower(strings.ReplaceAll(val.Title, " ", "_"))
+		uptpageali.PageTitle = val.Name
+		uptpageali.PageSlug = strings.ToLower(strings.ReplaceAll(val.Name, " ", "_"))
 		uptpageali.PageDescription = val.Content
 		uptpageali.PageSuborder = val.OrderIndex
 		uptpageali.Status = val.Status

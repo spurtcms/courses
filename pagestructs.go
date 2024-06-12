@@ -130,13 +130,14 @@ type PageGroups struct {
 	Name       string
 	OrderIndex int `json:"OrderIndex"`
 }
-
 type Pages struct {
 	PageId      int
-	Title       string
-	Content     string
+	NewPgId     int
+	Name        string
+	Content     string `json:"Content"`
 	Pgroupid    int
-	OrderIndex  int
+	NewGrpId    int
+	OrderIndex  int `json:"OrderIndex"`
 	ParentId    int
 	ReadTime    int
 	CreatedDate time.Time
@@ -148,13 +149,15 @@ type Pages struct {
 	CreatedBy   int
 	ModifiedBy  int
 }
-
 type SubPages struct {
 	SubPageId   int
-	Title       string
+	NewSpId     int
+	Name        string
 	Content     string
 	ParentId    int
+	NewParentId int
 	PgroupId    int
+	NewPgroupId int
 	ReadTime    int
 	OrderIndex  int `json:"OrderIndex"`
 	CreatedDate time.Time
@@ -164,6 +167,7 @@ type SubPages struct {
 	Username    string
 	Log         []PageLog
 	CreatedBy   int
+	ModifiedBy  int
 }
 
 // pass any one only-- (ids,id,groupids,groupid,spaceid,spaceids)

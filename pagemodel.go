@@ -89,7 +89,7 @@ func (SpaceModel) SelectPage(pagereq GetPageReq, DB *gorm.DB) (tblpage []TblPage
 
 func (SpaceModel) PageAliases(page GetPageReq, DB *gorm.DB) (tblpage []Tblpagealiases, singepage Tblpagealiases, err error) {
 
-	query := DB.Table("tbl_page_aliases").Select("tbl_page_aliases.*,tbl_pages.page_group_id,tbl_users.username")
+	query := DB.Table("tbl_page_aliases").Select("tbl_page_aliases.*,tbl_pages.parent_id,tbl_pages.page_group_id,tbl_users.username")
 
 	query.Joins("inner join tbl_pages on tbl_pages.id = tbl_page_aliases.page_id")
 
