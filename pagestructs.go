@@ -127,11 +127,13 @@ type PageLog struct {
 
 type PageGroups struct {
 	GroupId    int
+	NewGroupId int
 	Name       string
 	OrderIndex int `json:"OrderIndex"`
 }
+
 type Pages struct {
-	PageId      int
+	PgId        int
 	NewPgId     int
 	Name        string
 	Content     string `json:"Content"`
@@ -150,7 +152,7 @@ type Pages struct {
 	ModifiedBy  int
 }
 type SubPages struct {
-	SubPageId   int
+	SpgId       int
 	NewSpId     int
 	Name        string
 	Content     string

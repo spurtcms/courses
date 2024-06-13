@@ -124,7 +124,7 @@ func TestCreatePagelog(t *testing.T) {
 		PermissionEnable: false,
 	})
 
-	page := Pages{PageId: 1, Name: "Introduction", ParentId: 1}
+	page := Pages{PgId: 1, Name: "Introduction", ParentId: 1}
 
 	pagelog, err := space.CreatePagelog(2, []Pages{page}, "public")
 
@@ -212,7 +212,7 @@ func TestUpdatePage(t *testing.T) {
 		PermissionEnable: false,
 	})
 
-	page := Pages{PageId: 1, Name: "Introduction", OrderIndex: 1}
+	page := Pages{PgId: 1, Name: "Introduction", OrderIndex: 1}
 
 	pagelog, err := space.UpdatePage(2, []Pages{page})
 
@@ -256,7 +256,7 @@ func TestUpdateSubpage(t *testing.T) {
 		PermissionEnable: false,
 	})
 
-	spage := SubPages{SubPageId: 4, Name: "Introduction", ParentId: 1}
+	spage := SubPages{SpgId: 4, Name: "Introduction", ParentId: 1}
 
 	subpage, err := space.UpdateSubpage(2, []SubPages{spage})
 

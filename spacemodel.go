@@ -327,3 +327,52 @@ func (SpaceModel) LastLoopAliasesInPage(data *TblPageAliases, pagetitle string, 
 
 	return nil
 }
+
+func (SpaceModel) DeletePageInSpace(page *TblPage, id []int, DB *gorm.DB) error {
+
+	if err := DB.Table("tbl_pages").Where("tbl_pages.id IN ?", id).UpdateColumns(map[string]interface{}{"deleted_by": page.DeletedBy, "deleted_on": page.DeletedOn, "is_deleted": page.IsDeleted}).Error; err != nil {
+
+		return err
+	}
+
+	return nil
+}
+func (SpaceModel) DeletePageAliInSpace(pageali *TblPageAliases, id []int, DB *gorm.DB) error {
+
+	if err := DB.Table("tbl_page_aliases").Where("tbl_page_aliases.page_id IN ?", id).UpdateColumns(map[string]interface{}{"deleted_by": pageali.DeletedBy, "deleted_on": pageali.DeletedOn, "is_deleted": pageali.IsDeleted}).Error; err != nil {
+
+		return err
+	}
+
+	return nil
+}
+// get pagegroup data by pass spaceid
+func (SpaceModel) GetPageGroupDetailsBySpaceId(getpagegrp *[]TblPagesGroup, id int, DB *gorm.DB) (*[]TblPagesGroup, error) {
+
+	if err := DB.Table("tbl_pages_group").Where("tbl_pages_group.is_deleted = ? and tbl_pages_group.spaces_id = ?", 0, id).Find(&getpagegrp).Error; err != nil {
+
+		return &[]TblPagesGroup{}, err
+	}
+
+	return getpagegrp, nil
+}
+// delete page group
+func (SpaceModel) SpaceDeletePageGroup(tblpage *TblPagesGroup, id int, DB *gorm.DB) error {
+
+	if err := DB.Table("tbl_pages_group").Where("tbl_pages_group.id=?", id).UpdateColumns(map[string]interface{}{"is_deleted": tblpage.IsDeleted, "deleted_on": tblpage.DeletedOn, "deleted_by": tblpage.DeletedBy}).Error; err != nil {
+
+		return err
+	}
+
+	return nil
+}
+// delete page group aliases
+func (SpaceModel) SpaceDeletePageGroupAliases(tblpageali *TblPagesGroupAliases, id int, DB *gorm.DB) error {
+
+	if err := DB.Table("tbl_pages_group_aliases").Where("tbl_pages_group_aliases.page_group_id=?", id).UpdateColumns(map[string]interface{}{"is_deleted": tblpageali.IsDeleted, "deleted_on": tblpageali.DeletedOn, "deleted_by": tblpageali.DeletedBy}).Error; err != nil {
+
+		return err
+	}
+
+	return nil
+}

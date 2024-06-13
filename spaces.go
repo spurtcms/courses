@@ -211,30 +211,86 @@ func (spaces *Spaces) DeleteSpaceAliase(spaceid int, deletedBy int) error {
 }
 
 /*Delete Space*/
-func (spaces *Spaces) DeleteSpace(spaceid int, deletedBy int) error {
+func (spaces *Spaces) DeleteSpace(spaceid int,userid int) error {
 
-	autherr := AuthandPermission(spaces)
+	var (
+		tblspaces TblSpacesAliases
+		space TblSpaces
+		pageali TblPageAliases
+	)
 
-	if autherr != nil {
+	tblspaces.DeletedOn, _ = time.Parse("2006-01-02 15:04:05", time.Now().UTC().Format("2006-01-02 15:04:05"))
+	tblspaces.DeletedBy = userid
+	tblspaces.IsDeleted = 1
+	space.DeletedOn, _ = time.Parse("2006-01-02 15:04:05", time.Now().UTC().Format("2006-01-02 15:04:05"))
+	space.DeletedBy = userid
+	space.IsDeleted = 1
+	
+	var deletedon, _ = time.Parse("2006-01-02 15:04:05", time.Now().UTC().Format("2006-01-02 15:04:05"))
+	var deletedby = userid
+	var isdeleted = 1
 
-		return autherr
+	pageali.DeletedOn = deletedon
+	pageali.DeletedBy = deletedby
+	pageali.IsDeleted = isdeleted
+	err1 := Spacemodel.DeleteSpaceAliases(&tblspaces, spaceid, spaces.DB)
+	if err1 != nil {
+		return err1
 	}
 
-	var space TblSpaces
-	space.DeletedOn = CurrentTime
-	space.DeletedBy = deletedBy
-	space.IsDeleted = 1
-	err := Spacemodel.DeleteSpace(&space, spaceid, spaces.DB)
+	err2 := Spacemodel.DeleteSpace(&space, spaceid, spaces.DB)
 
-	if err != nil {
+	if err2 != nil {
+		return err2
+	}
 
-		return err
+	var page []TblPage
+	Spacemodel.GetPageDetailsBySpaceId(&page, spaceid,spaces.DB)
+
+	var pid []int
+	if len(page) != 0 {
+		for _, v := range page {
+			pid = append(pid, v.Id)
+		}
+
+		var pg TblPage
+		pg.DeletedOn, _ = time.Parse("2006-01-02 15:04:05", time.Now().UTC().Format("2006-01-02 15:04:05"))
+		pg.DeletedBy = userid
+		pg.IsDeleted = 1
+		Spacemodel.DeletePageInSpace(&pg, pid, spaces.DB)
+
+		var pgali TblPageAliases
+		pgali.DeletedOn, _ = time.Parse("2006-01-02 15:04:05", time.Now().UTC().Format("2006-01-02 15:04:05"))
+		pgali.DeletedBy = userid
+		pgali.IsDeleted = 1
+		Spacemodel.DeletePageAliInSpace(&pgali, pid, spaces.DB)
+
+		var pagegroup []TblPagesGroup
+		Spacemodel.GetPageGroupDetailsBySpaceId(&pagegroup, spaceid, spaces.DB)
+
+		var pagegroupid int
+		for _, v := range page {
+			v.Id = pagegroupid
+
+		}
+
+		var pggroupdel TblPagesGroup
+		pggroupdel.DeletedBy = userid
+		pggroupdel.IsDeleted = 1
+		pggroupdel.DeletedOn, _ = time.Parse("2006-01-02 15:04:05", time.Now().UTC().Format("2006-01-02 15:04:05"))
+		Spacemodel.SpaceDeletePageGroup(&pggroupdel, pagegroupid, spaces.DB)
+
+		var pggroupalidel TblPagesGroupAliases
+		pggroupalidel.DeletedBy = userid
+		pggroupalidel.IsDeleted = 1
+		pggroupalidel.DeletedOn, _ = time.Parse("2006-01-02 15:04:05", time.Now().UTC().Format("2006-01-02 15:04:05"))
+		Spacemodel.SpaceDeletePageGroupAliases(&pggroupalidel, pagegroupid, spaces.DB)
 
 	}
 
 	return nil
-
 }
+
 
 // clone space - func helps to create duplicate space, using given space id
 func (spaces *Spaces) CloneSpace(createspace SpaceCreation, spaceid int, createdBy int) (Tblspacesaliases, error) {
