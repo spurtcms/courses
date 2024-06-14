@@ -130,7 +130,10 @@ func (spaces *Spaces) SpaceCreation(SPC SpaceCreation) (tblspac Tblspacesaliases
 	space.PageCategoryId = SPC.CategoryId
 	space.CreatedOn = CurrentTime
 	space.CreatedBy = SPC.CreatedBy
-	Spacemodel.CreateSpace(space, spaces.DB)
+	createspace, err := Spacemodel.CreateSpace(space, spaces.DB)
+	if err != nil {
+		return Tblspacesaliases{}, err
+	}
 
 	var spacealiase Tblspacesaliases
 	spacealiase.SpacesName = SPC.Name
@@ -140,7 +143,7 @@ func (spaces *Spaces) SpaceCreation(SPC SpaceCreation) (tblspac Tblspacesaliases
 	spacealiase.CreatedOn = CurrentTime
 	spacealiase.CreatedBy = SPC.CreatedBy
 	spacealiase.SpacesSlug = strings.ToLower(spacealiase.SpacesName)
-	spacealiase.SpacesId = space.Id
+	spacealiase.SpacesId = createspace.Id
 	Spacemodel.CreateSpaceAliase(spacealiase, spaces.DB)
 
 	return spacealiase, nil
@@ -211,12 +214,12 @@ func (spaces *Spaces) DeleteSpaceAliase(spaceid int, deletedBy int) error {
 }
 
 /*Delete Space*/
-func (spaces *Spaces) DeleteSpace(spaceid int,userid int) error {
+func (spaces *Spaces) DeleteSpace(spaceid int, userid int) error {
 
 	var (
 		tblspaces TblSpacesAliases
-		space TblSpaces
-		pageali TblPageAliases
+		space     TblSpaces
+		pageali   TblPageAliases
 	)
 
 	tblspaces.DeletedOn, _ = time.Parse("2006-01-02 15:04:05", time.Now().UTC().Format("2006-01-02 15:04:05"))
@@ -225,7 +228,7 @@ func (spaces *Spaces) DeleteSpace(spaceid int,userid int) error {
 	space.DeletedOn, _ = time.Parse("2006-01-02 15:04:05", time.Now().UTC().Format("2006-01-02 15:04:05"))
 	space.DeletedBy = userid
 	space.IsDeleted = 1
-	
+
 	var deletedon, _ = time.Parse("2006-01-02 15:04:05", time.Now().UTC().Format("2006-01-02 15:04:05"))
 	var deletedby = userid
 	var isdeleted = 1
@@ -245,7 +248,7 @@ func (spaces *Spaces) DeleteSpace(spaceid int,userid int) error {
 	}
 
 	var page []TblPage
-	Spacemodel.GetPageDetailsBySpaceId(&page, spaceid,spaces.DB)
+	Spacemodel.GetPageDetailsBySpaceId(&page, spaceid, spaces.DB)
 
 	var pid []int
 	if len(page) != 0 {
@@ -290,7 +293,6 @@ func (spaces *Spaces) DeleteSpace(spaceid int,userid int) error {
 
 	return nil
 }
-
 
 // clone space - func helps to create duplicate space, using given space id
 func (spaces *Spaces) CloneSpace(createspace SpaceCreation, spaceid int, createdBy int) (Tblspacesaliases, error) {
@@ -338,7 +340,7 @@ func (spaces *Spaces) CloneSpace(createspace SpaceCreation, spaceid int, created
 		pagegroup := value
 		pagegroup.PageGroupId = groups.Id
 		pagegroup.CreatedOn, _ = time.Parse("2006-01-02 15:04:05", time.Now().UTC().Format("2006-01-02 15:04:05"))
-		Spacemodel.CreatePageGroupAliases(&pagegroup, spaces.DB)
+		Spacemodel.ClonePagesGroup(&pagegroup, spaces.DB)
 	}
 
 	var pageId []Tblpagealiases
@@ -356,7 +358,7 @@ func (spaces *Spaces) CloneSpace(createspace SpaceCreation, spaceid int, created
 		pagesali := val
 		pagesali.PageId = pageid.Id
 		pagesali.CreatedOn, _ = time.Parse("2006-01-02 15:04:05", time.Now().UTC().Format("2006-01-02 15:04:05"))
-		Spacemodel.CreatepageAliases(&pagesali, spaces.DB)
+		Spacemodel.ClonePages(&pagesali, spaces.DB)
 
 	}
 
@@ -380,7 +382,7 @@ func (spaces *Spaces) CloneSpace(createspace SpaceCreation, spaceid int, created
 		pagesali := value
 		pagesali.PageId = pagess.Id
 		pagesali.CreatedOn, _ = time.Parse("2006-01-02 15:04:05", time.Now().UTC().Format("2006-01-02 15:04:05"))
-		Spacemodel.CreatepageAliases(&pagesali, spaces.DB)
+		Spacemodel.ClonePages(&pagesali, spaces.DB)
 
 	}
 
@@ -415,7 +417,7 @@ func (spaces *Spaces) CloneSpace(createspace SpaceCreation, spaceid int, created
 		// var pagesali TblPageAliases
 		pagesali := result
 		pagesali.PageId = pagealiid.Id
-		Spacemodel.CreatepageAliases(&pagesali, spaces.DB)
+		Spacemodel.ClonePages(&pagesali, spaces.DB)
 
 	}
 	return spacealise, err

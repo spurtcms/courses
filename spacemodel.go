@@ -346,6 +346,7 @@ func (SpaceModel) DeletePageAliInSpace(pageali *TblPageAliases, id []int, DB *go
 
 	return nil
 }
+
 // get pagegroup data by pass spaceid
 func (SpaceModel) GetPageGroupDetailsBySpaceId(getpagegrp *[]TblPagesGroup, id int, DB *gorm.DB) (*[]TblPagesGroup, error) {
 
@@ -356,6 +357,7 @@ func (SpaceModel) GetPageGroupDetailsBySpaceId(getpagegrp *[]TblPagesGroup, id i
 
 	return getpagegrp, nil
 }
+
 // delete page group
 func (SpaceModel) SpaceDeletePageGroup(tblpage *TblPagesGroup, id int, DB *gorm.DB) error {
 
@@ -366,6 +368,7 @@ func (SpaceModel) SpaceDeletePageGroup(tblpage *TblPagesGroup, id int, DB *gorm.
 
 	return nil
 }
+
 // delete page group aliases
 func (SpaceModel) SpaceDeletePageGroupAliases(tblpageali *TblPagesGroupAliases, id int, DB *gorm.DB) error {
 
@@ -374,5 +377,25 @@ func (SpaceModel) SpaceDeletePageGroupAliases(tblpageali *TblPagesGroupAliases, 
 		return err
 	}
 
+	return nil
+}
+
+func (SpaceModel) ClonePages(pages *Tblpagealiases, DB *gorm.DB) error {
+
+	if err := DB.Table("tbl_page_aliases").Omit("id").Create(&pages).Error; err != nil {
+
+		return err
+
+	}
+	return nil
+
+}
+func (SpaceModel) ClonePagesGroup(pagegroup *TblPagesGroupAliases, DB *gorm.DB) error {
+
+	if err := DB.Table("tbl_pages_group_aliases").Omit("id").Create(&pagegroup).Error; err != nil {
+
+		return err
+
+	}
 	return nil
 }
