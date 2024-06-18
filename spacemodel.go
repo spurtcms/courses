@@ -73,18 +73,17 @@ func (SpaceModel) GetLastUpdatePageAliases(tblpageali *TblPageAliases, spaceid i
 
 func (SpaceModel) GetSpacealiaseDetails(spaceid int, spaceslug string, DB *gorm.DB) (TblSpacesAliase Tblspacesaliases, err error) {
 
-	query := DB.Table("tbl_spaces_aliases").First(&TblSpacesAliase)
+	query := DB.Table("tbl_spaces_aliases")
 
 	if spaceid > 0 {
-
 		query = query.Where("spaces_id=?", spaceid)
-
 	}
 
 	if spaceslug != "" {
-
-		query = query.Where("spaces_slug=?", spaceid)
+		query = query.Where("spaces_slug=?", spaceslug)
 	}
+
+	query.First(&TblSpacesAliase)
 
 	if err := query.Error; err != nil {
 
