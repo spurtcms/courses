@@ -31,6 +31,9 @@ func (spaces *Spaces) SpaceList(spacelistreq SpaceListReq) (tblspace []Tblspaces
 		return []Tblspacesaliases{}, 0, autherr
 	}
 
+	Spacemodel.DataAccess = spaces.DataAccess
+	Spacemodel.UserId = spaces.UserId
+
 	spacess, _, spaceerr := Spacemodel.SpaceList(spacelistreq, []int{}, spaces.DB)
 	if spaceerr != nil {
 

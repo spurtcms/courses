@@ -106,6 +106,9 @@ type SpaceDetail struct {
 	ImagePathUrl string
 }
 
-type SpaceModel struct{}
+type SpaceModel struct {
+	DataAccess int
+	UserId     int
+}
 
 var Spacemodel SpaceModel

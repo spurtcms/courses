@@ -25,4 +25,6 @@ type Spaces struct {
 	AuthEnable       bool
 	PermissionEnable bool
 	Auth             *auth.Auth
+	DataAccess       int
+	UserId           int
 }
