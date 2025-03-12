@@ -1,3 +1,3 @@
-module courses
+module github.com/spurtcms/courses
 
-go 1.19
+go 1.20
