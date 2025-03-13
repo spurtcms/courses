@@ -23,7 +23,41 @@ func CoursesSetup(config Config) *Courses {
 
 }
 
-func (courses *Courses) CreateCourse(create TblCourses) error {
+func (courses *Courses) CoursesList(limit, offset int, filter Filter, tenantid int) (list []TblCourses, Count int64, err error) {
+
+	if Autherr := AuthandPermission(courses); Autherr != nil {
+
+		return []TblCourses{}, 0, Autherr
+
+	}
+
+	if filter.Status == "Draft" {
+
+		filter.Status = "0"
+
+	} else if filter.Status == "Published" {
+
+		filter.Status = "1"
+
+	} else if filter.Status == "Unpublished" {
+
+		filter.Status = "2"
+
+	}
+
+	courseslist, _, _ := Coursemodels.ListCourses(limit, offset, filter, tenantid, courses.DB)
+
+	_, count, err := Coursemodels.ListCourses(0, 0, filter, tenantid, courses.DB)
+	if err != nil {
+
+		return []TblCourses{}, 0, err
+	}
+
+	return courseslist, count, nil
+
+}
+
+func (courses *Courses) CreateCourse(create TblCourse) error {
 
 	if Autherr := AuthandPermission(courses); Autherr != nil {
 
@@ -32,7 +66,7 @@ func (courses *Courses) CreateCourse(create TblCourses) error {
 
 	createdon, _ := time.Parse("2006-01-02 15:04:05", time.Now().UTC().Format("2006-01-02 15:04:05"))
 
-	Create := TblCourses{
+	Create := TblCourse{
 		Title:       create.Title,
 		Description: create.Description,
 		CategoryId:  create.CategoryId,
@@ -54,4 +88,52 @@ func (courses *Courses) CreateCourse(create TblCourses) error {
 
 	return nil
 
+}
+
+func (courses *Courses) DeleteCourses(id, userid, tenantid int) error {
+
+	if Autherr := AuthandPermission(courses); Autherr != nil {
+
+		return Autherr
+	}
+
+	deletedon, _ := time.Parse("2006-01-02 15:04:05", time.Now().UTC().Format("2006-01-02 15:04:05"))
+
+	deletedby := userid
+
+	err := Coursemodels.DeleteCourse(id, tenantid, deletedby, deletedon, courses.DB)
+
+	if err != nil {
+
+		return err
+	}
+
+	return nil
+
+}
+
+func (courses *Courses) MultiSelectDeleteCourse(courseids []int, modifiedby int, tenantid int) error {
+
+	if Autherr := AuthandPermission(courses); Autherr != nil {
+
+		return Autherr
+	}
+
+	var Course TblCourse
+
+	Course.DeletedBy = modifiedby
+
+	Course.DeletedOn, _ = time.Parse("2006-01-02 15:04:05", time.Now().UTC().Format("2006-01-02 15:04:05"))
+
+	Course.IsDeleted = 1
+
+	Course.TenantId = tenantid
+
+	err := Coursemodels.MultiSelectCourseDelete(&Course, courseids, courses.DB)
+	if err != nil {
+
+		return err
+
+	}
+	return nil
 }
