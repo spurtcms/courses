@@ -90,6 +90,23 @@ func (courses *Courses) CreateCourse(create TblCourse) error {
 
 }
 
+func (courses *Courses)  EditCourses(id, tenantid int) (courselist TblCourse, err error) {
+
+	if Autherr := AuthandPermission(courses); Autherr != nil {
+
+		return TblCourse{}, Autherr
+	}
+
+	courselist, err = Coursemodels.EditCourse(id, tenantid, courses.DB)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	return courselist, nil
+
+}
+
+
 func (courses *Courses) DeleteCourses(id, userid, tenantid int) error {
 
 	if Autherr := AuthandPermission(courses); Autherr != nil {

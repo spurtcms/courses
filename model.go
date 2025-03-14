@@ -140,6 +140,17 @@ func (Coursemodels CoursesModel) CreateCourse(course TblCourse, DB *gorm.DB) err
 
 }
 
+func (Coursemodels CoursesModel) EditCourse(id, tenantid int, DB *gorm.DB) (courselist TblCourse, err error) {
+
+	if err := DB.Table("tbl_courses").Where("id=? and tenant_id=? and is_deleted=0", id, tenantid).First(&courselist).Error; err != nil {
+
+		return TblCourse{}, err
+	}
+
+	return courselist, nil
+
+}
+
 func (Coursemodels CoursesModel) DeleteCourse(id, tenantid, deletedby int, deletedon time.Time, DB *gorm.DB) error {
 
 	if err := DB.Table("tbl_courses").Where("id=? and tenant_id=?", id, tenantid).UpdateColumns(map[string]interface{}{"is_deleted": 1, "deleted_by": deletedby, "deleted_on": deletedon}).Error; err != nil {
@@ -150,7 +161,7 @@ func (Coursemodels CoursesModel) DeleteCourse(id, tenantid, deletedby int, delet
 	return nil
 }
 
-func (Coursemodels CoursesModel)  MultiSelectCourseDelete(course *TblCourse, id []int, DB *gorm.DB) error {
+func (Coursemodels CoursesModel) MultiSelectCourseDelete(course *TblCourse, id []int, DB *gorm.DB) error {
 
 	if err := DB.Table("tbl_courses").Where("id in (?) and tenant_id=?", id, course.TenantId).UpdateColumns(map[string]interface{}{"is_deleted": course.IsDeleted, "deleted_on": course.DeletedOn, "deleted_by": course.DeletedBy}).Error; err != nil {
 
