@@ -23,7 +23,7 @@ func CoursesSetup(config Config) *Courses {
 
 }
 
-func (courses *Courses) CoursesList(limit, offset int, filter Filter, tenantid int) (list []TblCourses, Count int64, err error) {
+func (courses *Courses) CoursesList(limit, offset int, filter Filter, tenantid string) (list []TblCourses, Count int64, err error) {
 
 	if Autherr := AuthandPermission(courses); Autherr != nil {
 
@@ -90,7 +90,7 @@ func (courses *Courses) CreateCourse(create TblCourse) error {
 
 }
 
-func (courses *Courses)  EditCourses(id, tenantid int) (courselist TblCourse, err error) {
+func (courses *Courses) EditCourses(id int, tenantid string) (courselist TblCourse, err error) {
 
 	if Autherr := AuthandPermission(courses); Autherr != nil {
 
@@ -106,8 +106,7 @@ func (courses *Courses)  EditCourses(id, tenantid int) (courselist TblCourse, er
 
 }
 
-
-func (courses *Courses) DeleteCourses(id, userid, tenantid int) error {
+func (courses *Courses) DeleteCourses(id, userid int, tenantid string) error {
 
 	if Autherr := AuthandPermission(courses); Autherr != nil {
 
@@ -129,7 +128,7 @@ func (courses *Courses) DeleteCourses(id, userid, tenantid int) error {
 
 }
 
-func (courses *Courses) MultiSelectDeleteCourse(courseids []int, modifiedby int, tenantid int) error {
+func (courses *Courses) MultiSelectDeleteCourse(courseids []int, modifiedby int, tenantid string) error {
 
 	if Autherr := AuthandPermission(courses); Autherr != nil {
 
