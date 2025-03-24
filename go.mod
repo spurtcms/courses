@@ -3,7 +3,8 @@ module github.com/spurtcms/courses
 go 1.20
 
 require (
-	github.com/spurtcms/auth v0.0.36
+	github.com/spurtcms/auth v0.0.37
+	github.com/spurtcms/categories v0.0.26
 	github.com/spurtcms/team-roles v0.0.20
 	gorm.io/gorm v1.25.12
 )

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"time"
 
+	categories "github.com/spurtcms/categories"
 	"gorm.io/gorm"
 )
 
@@ -29,7 +30,7 @@ type TblCourse struct {
 	Description string    `gorm:"type:character varying"`
 	ImageName   string    `gorm:"type:character varying"`
 	ImagePath   string    `gorm:"type:character varying"`
-	CategoryId  int       `gorm:"type:integer"`
+	CategoryId  string    `gorm:"type:character varying"`
 	Status      int       `gorm:"type:integer"`
 	TenantId    string    `gorm:"type:character varying"`
 	CreatedOn   time.Time `gorm:"type:timestamp without time zone;DEFAULT:NULL"`
@@ -48,7 +49,7 @@ type TblCourses struct {
 	Description      string    `gorm:"type:character varying"`
 	ImageName        string    `gorm:"type:character varying"`
 	ImagePath        string    `gorm:"type:character varying"`
-	CategoryId       int       `gorm:"type:integer"`
+	CategoryId       string    `gorm:"type:character varying"`
 	Status           int       `gorm:"type:integer"`
 	TenantId         string    `gorm:"type:character varying"`
 	CreatedOn        time.Time `gorm:"type:timestamp without time zone;DEFAULT:NULL"`
@@ -169,5 +170,16 @@ func (Coursemodels CoursesModel) MultiSelectCourseDelete(course *TblCourse, id [
 	}
 
 	return nil
+
+}
+
+func (Coursemodels CoursesModel) GetCategoriseById(id []int, DB *gorm.DB, tenantid string) (category []categories.TblCategories, err error) {
+
+	if err := DB.Table("tbl_categories").Where("id in (?) and tenant_id=?", id, tenantid).Order("id asc").Find(&category).Error; err != nil {
+
+		return category, err
+	}
+
+	return category, nil
 
 }
