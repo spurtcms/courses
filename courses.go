@@ -193,3 +193,97 @@ func (courses *Courses) MultiSelectDeleteCourse(courseids []int, modifiedby int,
 	}
 	return nil
 }
+
+//Create Section
+
+func (courses *Courses) CreateSections(create TblSection) error {
+
+	if Autherr := AuthandPermission(courses); Autherr != nil {
+
+		return Autherr
+	}
+
+	createdon, _ := time.Parse("2006-01-02 15:04:05", time.Now().UTC().Format("2006-01-02 15:04:05"))
+
+	Create := TblSection{
+		Title:     create.Title,
+		Content:   create.Content,
+		CourseId:  create.CourseId,
+		TenantId:  create.TenantId,
+		CreatedOn: createdon,
+		CreatedBy: create.CreatedBy,
+		IsDeleted: create.IsDeleted,
+	}
+
+	err := Coursemodels.CreateSection(Create, courses.DB)
+
+	if err != nil {
+
+		return err
+	}
+
+	return nil
+
+}
+
+//List Section
+
+func (courses *Courses) ListSections(id int, tenantid string) (section []TblSection, err error) {
+
+	if Autherr := AuthandPermission(courses); Autherr != nil {
+
+		return []TblSection{}, Autherr
+	}
+
+	sectionlist, err := Coursemodels.SectionList(id, tenantid, courses.DB)
+
+	if err != nil {
+
+		return []TblSection{}, err
+	}
+
+	return sectionlist, nil
+
+}
+
+//Edit Section
+
+func (courses *Courses) EditSections(sectionid int, coursesid int, tenantid string) (section TblSection, err error) {
+
+	if Autherr := AuthandPermission(courses); Autherr != nil {
+
+		return TblSection{}, Autherr
+	}
+
+	section, err = Coursemodels.EditSection(sectionid, coursesid, tenantid, courses.DB)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	return section, nil
+
+}
+
+//Delete Section
+
+func (courses *Courses) DeleteSections(sectionid, userid int, courseid int, tenantid string) error {
+
+	if Autherr := AuthandPermission(courses); Autherr != nil {
+
+		return Autherr
+	}
+
+	deletedon, _ := time.Parse("2006-01-02 15:04:05", time.Now().UTC().Format("2006-01-02 15:04:05"))
+
+	deletedby := userid
+
+	err := Coursemodels.DeleteSection(sectionid, courseid, tenantid, deletedby, deletedon, courses.DB)
+
+	if err != nil {
+
+		return err
+	}
+
+	return nil
+
+}

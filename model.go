@@ -68,6 +68,24 @@ type TblCourses struct {
 	NameString       string    `gorm:"-"`
 }
 
+//Create Section
+
+type TblSection struct {
+	Id         int       `gorm:"primaryKey;auto_increment;type:serial"`
+	Title      string    `gorm:"type:character varying"`
+	Content    string    `gorm:"type:character varying"`
+	CourseId   int       `gorm:"type:integer"`
+	TenantId   string    `gorm:"type:character varying"`
+	OrderIndex int       `gorm:"type:integer"`
+	CreatedOn  time.Time `gorm:"type:timestamp without time zone;DEFAULT:NULL"`
+	CreatedBy  int       `gorm:"type:integer"`
+	ModifiedOn time.Time `gorm:"DEFAULT:NULL"`
+	ModifiedBy int       `gorm:"type:integer;DEFAULT:NULL"`
+	DeletedOn  time.Time `gorm:"DEFAULT:NULL"`
+	DeletedBy  int       `gorm:"type:integer;DEFAULT:NULL"`
+	IsDeleted  int       `gorm:"type:integer;DEFAULT:0"`
+}
+
 func (Coursesmodels CoursesModel) ListCourses(limit, offset int, filter Filter, tenantid string, DB *gorm.DB) (courselist []TblCourses, count int64, err error) {
 
 	query := DB.Table("tbl_courses").Select("tbl_courses.*,tbl_users.profile_image_path,tbl_users.first_name,tbl_users.last_name,tbl_users.username").Joins("inner join tbl_users on tbl_courses.created_by=tbl_users.id").Where("tbl_courses.is_deleted=0 and tbl_courses.tenant_id=?", tenantid)
@@ -182,4 +200,54 @@ func (Coursemodels CoursesModel) GetCategoriseById(id []int, DB *gorm.DB, tenant
 
 	return category, nil
 
+}
+
+//create sections
+
+func (Coursemodels CoursesModel) CreateSection(section TblSection, DB *gorm.DB) error {
+
+	if err := DB.Table("tbl_sections").Create(&section).Error; err != nil {
+
+		return err
+	}
+
+	return nil
+
+}
+
+//ListSections
+
+func (Coursemodels CoursesModel) SectionList(id int, tenantid string, DB *gorm.DB) (section []TblSection, err error) {
+
+	if err := DB.Table("tbl_sections").Where("course_id=? and tenant_id=? and is_deleted=0", id, tenantid).Find(&section).Error; err != nil {
+
+		return []TblSection{}, err
+	}
+
+	return section, nil
+}
+
+//Edit Section
+
+func (Coursemodels CoursesModel) EditSection(sectionid int, coursesid int, tenantid string, DB *gorm.DB) (section TblSection, err error) {
+
+	if err := DB.Debug().Table("tbl_sections").Where("id=? and course_id=? and tenant_id=?", sectionid, coursesid, tenantid).First(&section).Error; err != nil {
+
+		return TblSection{}, err
+	}
+
+	return section, nil
+
+}
+
+//Section Delete
+
+func (Coursemodels CoursesModel) DeleteSection(sectionid int, coursesid int, tenantid string, deletedby int, deletedon time.Time, DB *gorm.DB) error {
+
+	if err := DB.Table("tbl_sections").Where("id=? and course_id=? and tenant_id=?", sectionid, coursesid, tenantid).UpdateColumns(map[string]interface{}{"is_deleted": 1, "deleted_by": deletedby, "deleted_on": deletedon}).Error; err != nil {
+
+		return err
+	}
+
+	return nil
 }
