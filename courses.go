@@ -287,3 +287,119 @@ func (courses *Courses) DeleteSections(sectionid, userid int, courseid int, tena
 	return nil
 
 }
+
+//Create Text
+
+func (courses *Courses) CreateLessons(lesson TblLesson) error {
+
+	if Autherr := AuthandPermission(courses); Autherr != nil {
+
+		return Autherr
+	}
+
+	createdon, _ := time.Parse("2006-01-02 15:04:05", time.Now().UTC().Format("2006-01-02 15:04:05"))
+
+	Create := TblLesson{
+		CourseId:   lesson.CourseId,
+		SectionId:  lesson.SectionId,
+		Title:      lesson.Title,
+		Content:    lesson.Content,
+		TenantId:   lesson.TenantId,
+		LessonType: lesson.LessonType,
+		CreatedOn:  createdon,
+		CreatedBy:  lesson.CreatedBy,
+		IsDeleted:  lesson.IsDeleted,
+	}
+
+	err := Coursemodels.CreateLesson(Create, courses.DB)
+
+	if err != nil {
+
+		return err
+	}
+
+	return nil
+
+}
+
+//List Lesson
+
+func (courses *Courses) ListLessons(id int, tenantid string) (lesson []TblLesson, err error) {
+
+	if Autherr := AuthandPermission(courses); Autherr != nil {
+
+		return []TblLesson{}, Autherr
+	}
+
+	lessonlist, err := Coursemodels.LessonList(id, tenantid, courses.DB)
+
+	if err != nil {
+
+		return []TblLesson{}, err
+	}
+
+	return lessonlist, nil
+
+}
+
+//Edit Lesson
+
+func (courses *Courses) EditLessons(lessonid int, coursesid int, tenantid string) (lesson TblLesson, err error) {
+
+	if Autherr := AuthandPermission(courses); Autherr != nil {
+
+		return TblLesson{}, Autherr
+	}
+
+	lesson, err = Coursemodels.EditLesson(lessonid, coursesid, tenantid, courses.DB)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	return lesson, nil
+
+}
+
+//Delete Lesson
+
+func (courses *Courses) DeleteLessons(lessonid, userid int, courseid int, tenantid string) error {
+
+	if Autherr := AuthandPermission(courses); Autherr != nil {
+
+		return Autherr
+	}
+
+	deletedon, _ := time.Parse("2006-01-02 15:04:05", time.Now().UTC().Format("2006-01-02 15:04:05"))
+
+	deletedby := userid
+
+	err := Coursemodels.DeleteLesson(lessonid, courseid, tenantid, deletedby, deletedon, courses.DB)
+
+	if err != nil {
+
+		return err
+	}
+
+	return nil
+
+}
+
+//Publish Course
+
+func (courses *Courses) StatusChanges(courseid int,status int, tenantid string) error {
+
+	if Autherr := AuthandPermission(courses); Autherr != nil {
+
+		return Autherr
+	}
+
+	err := Coursemodels.StatusChange(courseid, status, tenantid, courses.DB)
+
+	if err != nil {
+
+		return err
+	}
+
+	return nil
+
+}

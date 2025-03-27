@@ -86,6 +86,28 @@ type TblSection struct {
 	IsDeleted  int       `gorm:"type:integer;DEFAULT:0"`
 }
 
+//Create Lesson fields
+
+type TblLesson struct {
+	Id         int       `gorm:"primaryKey;auto_increment;type:serial"`
+	CourseId   int       `gorm:"type:integer"`
+	SectionId  int       `gorm:"type:integer"`
+	Title      string    `gorm:"type:character varying"`
+	Content    string    `gorm:"type:character varying"`
+	EmbedLink  string    `gorm:"type:character varying"`
+	FileName   string    `gorm:"type:character varying"`
+	LessonType string    `gorm:"type:character varying"`
+	OrderIndex int       `gorm:"type:integer"`
+	TenantId   string    `gorm:"type:character varying"`
+	CreatedOn  time.Time `gorm:"type:timestamp without time zone;DEFAULT:NULL"`
+	CreatedBy  int       `gorm:"type:integer"`
+	ModifiedOn time.Time `gorm:"DEFAULT:NULL"`
+	ModifiedBy int       `gorm:"type:integer;DEFAULT:NULL"`
+	DeletedOn  time.Time `gorm:"DEFAULT:NULL"`
+	DeletedBy  int       `gorm:"type:integer;DEFAULT:NULL"`
+	IsDeleted  int       `gorm:"type:integer;DEFAULT:0"`
+}
+
 func (Coursesmodels CoursesModel) ListCourses(limit, offset int, filter Filter, tenantid string, DB *gorm.DB) (courselist []TblCourses, count int64, err error) {
 
 	query := DB.Table("tbl_courses").Select("tbl_courses.*,tbl_users.profile_image_path,tbl_users.first_name,tbl_users.last_name,tbl_users.username").Joins("inner join tbl_users on tbl_courses.created_by=tbl_users.id").Where("tbl_courses.is_deleted=0 and tbl_courses.tenant_id=?", tenantid)
@@ -245,6 +267,68 @@ func (Coursemodels CoursesModel) EditSection(sectionid int, coursesid int, tenan
 func (Coursemodels CoursesModel) DeleteSection(sectionid int, coursesid int, tenantid string, deletedby int, deletedon time.Time, DB *gorm.DB) error {
 
 	if err := DB.Table("tbl_sections").Where("id=? and course_id=? and tenant_id=?", sectionid, coursesid, tenantid).UpdateColumns(map[string]interface{}{"is_deleted": 1, "deleted_by": deletedby, "deleted_on": deletedon}).Error; err != nil {
+
+		return err
+	}
+
+	return nil
+}
+
+//create Lesson
+
+func (Coursemodels CoursesModel) CreateLesson(lesson TblLesson, DB *gorm.DB) error {
+
+	if err := DB.Table("tbl_lessons").Create(&lesson).Error; err != nil {
+
+		return err
+	}
+
+	return nil
+
+}
+
+//ListLesson
+
+func (Coursemodels CoursesModel) LessonList(id int, tenantid string, DB *gorm.DB) (lesson []TblLesson, err error) {
+
+	if err := DB.Table("tbl_lessons").Where("course_id=? and tenant_id=? and is_deleted=0", id, tenantid).Find(&lesson).Error; err != nil {
+
+		return []TblLesson{}, err
+	}
+
+	return lesson, nil
+}
+
+//Edit Lesson
+
+func (Coursemodels CoursesModel) EditLesson(lessonid int, coursesid int, tenantid string, DB *gorm.DB) (lesson TblLesson, err error) {
+
+	if err := DB.Debug().Table("tbl_lessons").Where("id=? and course_id=? and tenant_id=?", lessonid, coursesid, tenantid).First(&lesson).Error; err != nil {
+
+		return TblLesson{}, err
+	}
+
+	return lesson, nil
+
+}
+
+//Delete Lesson
+
+func (Coursemodels CoursesModel) DeleteLesson(lessonid int, coursesid int, tenantid string, deletedby int, deletedon time.Time, DB *gorm.DB) error {
+
+	if err := DB.Table("tbl_lessons").Where("id=? and course_id=? and tenant_id=?", lessonid, coursesid, tenantid).UpdateColumns(map[string]interface{}{"is_deleted": 1, "deleted_by": deletedby, "deleted_on": deletedon}).Error; err != nil {
+
+		return err
+	}
+
+	return nil
+}
+
+//Publish Course
+
+func (Coursemodels CoursesModel) StatusChange(coursesid int,status int, tenantid string, DB *gorm.DB) error {
+
+	if err := DB.Table("tbl_courses").Where("id=? and tenant_id=?", coursesid, tenantid).UpdateColumns(map[string]interface{}{"status": status}).Error; err != nil {
 
 		return err
 	}
