@@ -241,7 +241,7 @@ func (Coursemodels CoursesModel) CreateSection(section TblSection, DB *gorm.DB) 
 
 func (Coursemodels CoursesModel) SectionList(id int, tenantid string, DB *gorm.DB) (section []TblSection, err error) {
 
-	if err := DB.Table("tbl_sections").Where("course_id=? and tenant_id=? and is_deleted=0", id, tenantid).Find(&section).Error; err != nil {
+	if err := DB.Table("tbl_sections").Where("course_id=? and tenant_id=? and is_deleted=0", id, tenantid).Order("tbl_sections.order_index asc").Find(&section).Error; err != nil {
 
 		return []TblSection{}, err
 	}
@@ -291,7 +291,7 @@ func (Coursemodels CoursesModel) CreateLesson(lesson TblLesson, DB *gorm.DB) err
 
 func (Coursemodels CoursesModel) LessonList(id int, tenantid string, DB *gorm.DB) (lesson []TblLesson, err error) {
 
-	if err := DB.Table("tbl_lessons").Where("course_id=? and tenant_id=? and is_deleted=0", id, tenantid).Find(&lesson).Error; err != nil {
+	if err := DB.Table("tbl_lessons").Where("course_id=? and tenant_id=? and is_deleted=0", id, tenantid).Order("tbl_lessons.order_index asc").Find(&lesson).Error; err != nil {
 
 		return []TblLesson{}, err
 	}
@@ -324,11 +324,61 @@ func (Coursemodels CoursesModel) DeleteLesson(lessonid int, coursesid int, tenan
 	return nil
 }
 
+//Update Order index for Lesson
+
+func (Coursemodels CoursesModel) UpdateLessonOrderIndex(lesson *TblLesson, lessonid int, courseid int, DB *gorm.DB, tenantid string) error {
+
+	if err := DB.Table("tbl_lessons").Where("id=? and course_id=? and tenant_id=?", lessonid, courseid, lesson.TenantId).UpdateColumns(map[string]interface{}{"order_index": lesson.OrderIndex}).Error; err != nil {
+
+		return err
+	}
+
+	return nil
+}
+
+//Lesson Reorder
+
+func (Coursemodels CoursesModel) UpdateLessonOrder(lesson *TblLesson, courseid int, DB *gorm.DB) error {
+
+	if err := DB.Table("tbl_lessons").Where("id=? and course_id=? and tenant_id=?", lesson.Id, courseid, lesson.TenantId).UpdateColumns(map[string]interface{}{"order_index": lesson.OrderIndex, "modified_by": lesson.ModifiedBy, "modified_on": lesson.ModifiedOn}).Error; err != nil {
+
+		return err
+	}
+
+	return nil
+}
+
 //Publish Course
 
-func (Coursemodels CoursesModel) StatusChange(coursesid int,status int, tenantid string, DB *gorm.DB) error {
+func (Coursemodels CoursesModel) StatusChange(coursesid int, status int, tenantid string, DB *gorm.DB) error {
 
 	if err := DB.Table("tbl_courses").Where("id=? and tenant_id=?", coursesid, tenantid).UpdateColumns(map[string]interface{}{"status": status}).Error; err != nil {
+
+		return err
+	}
+
+	return nil
+}
+
+//Update Order index for section
+
+func (Coursemodels CoursesModel) UpdateSectionOrderIndex(Section *TblSection, sectionid int, DB *gorm.DB, tenantid string) error {
+
+	fmt.Println("Section:", Section)
+
+	if err := DB.Table("tbl_sections").Where("id=? and tenant_id=?", sectionid, tenantid).UpdateColumns(map[string]interface{}{"order_index": Section.OrderIndex}).Error; err != nil {
+
+		return err
+	}
+
+	return nil
+}
+
+//Section Reorder
+
+func (Coursemodels CoursesModel) UpdateSectionOrder(Section *TblSection, courseid int, DB *gorm.DB) error {
+
+	if err := DB.Table("tbl_sections").Where("id=? and course_id=? and tenant_id=?", Section.Id, courseid, Section.TenantId).UpdateColumns(map[string]interface{}{"order_index": Section.OrderIndex, "modified_by": Section.ModifiedBy, "modified_on": Section.ModifiedOn}).Error; err != nil {
 
 		return err
 	}

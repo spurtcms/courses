@@ -206,13 +206,14 @@ func (courses *Courses) CreateSections(create TblSection) error {
 	createdon, _ := time.Parse("2006-01-02 15:04:05", time.Now().UTC().Format("2006-01-02 15:04:05"))
 
 	Create := TblSection{
-		Title:     create.Title,
-		Content:   create.Content,
-		CourseId:  create.CourseId,
-		TenantId:  create.TenantId,
-		CreatedOn: createdon,
-		CreatedBy: create.CreatedBy,
-		IsDeleted: create.IsDeleted,
+		Title:      create.Title,
+		Content:    create.Content,
+		CourseId:   create.CourseId,
+		OrderIndex: create.OrderIndex,
+		TenantId:   create.TenantId,
+		CreatedOn:  createdon,
+		CreatedBy:  create.CreatedBy,
+		IsDeleted:  create.IsDeleted,
 	}
 
 	err := Coursemodels.CreateSection(Create, courses.DB)
@@ -304,6 +305,7 @@ func (courses *Courses) CreateLessons(lesson TblLesson) error {
 		SectionId:  lesson.SectionId,
 		Title:      lesson.Title,
 		Content:    lesson.Content,
+		OrderIndex: lesson.OrderIndex,
 		TenantId:   lesson.TenantId,
 		LessonType: lesson.LessonType,
 		CreatedOn:  createdon,
@@ -384,9 +386,71 @@ func (courses *Courses) DeleteLessons(lessonid, userid int, courseid int, tenant
 
 }
 
+//Update Order index for Lesson
+
+func (courses *Courses) UpdateLessonOrderIndexes(Orderindex int,lessonid, courseid int, userid int, tenantid string) (bool, error) {
+
+	autherr := AuthandPermission(courses)
+
+	if autherr != nil {
+
+		return false, autherr
+	}
+
+	var Lesson TblLesson
+
+	Lesson.OrderIndex = Orderindex
+
+	Lesson.TenantId=tenantid
+
+	err := Coursemodels.UpdateLessonOrderIndex(&Lesson,lessonid, courseid, courses.DB, tenantid)
+
+	if err != nil {
+
+		return false, err
+	}
+
+	return true, nil
+}
+
+//Lesson OrderIndex Reorder
+
+func (courses *Courses) UpdateLessonOrders(lessonids []int, tenantid string, userid, courseid int) error {
+	autherr := AuthandPermission(courses)
+	if autherr != nil {
+		return autherr
+	}
+
+	var lesson TblLesson
+
+	lesson.ModifiedBy = userid
+	lesson.ModifiedOn, _ = time.Parse("2006-01-02 15:04:05", time.Now().UTC().Format("2006-01-02 15:04:05"))
+	lesson.TenantId = tenantid
+
+	for index, id := range lessonids {
+
+		if id != 0 {
+
+			lesson.Id = id
+
+			lesson.OrderIndex = index + 1
+
+			err := Coursemodels.UpdateLessonOrder(&lesson, courseid, courses.DB)
+
+			if err != nil {
+
+				return err
+			}
+		}
+
+	}
+
+	return nil
+}
+
 //Publish Course
 
-func (courses *Courses) StatusChanges(courseid int,status int, tenantid string) error {
+func (courses *Courses) StatusChanges(courseid int, status int, tenantid string) error {
 
 	if Autherr := AuthandPermission(courses); Autherr != nil {
 
@@ -402,4 +466,64 @@ func (courses *Courses) StatusChanges(courseid int,status int, tenantid string) 
 
 	return nil
 
+}
+
+//Update Order index for section
+
+func (courses *Courses) UpdateSectionOrderIndexes(Orderindex int, sectionid int, userid int, tenantid string) (bool, error) {
+
+	autherr := AuthandPermission(courses)
+
+	if autherr != nil {
+
+		return false, autherr
+	}
+
+	var Section TblSection
+
+	Section.OrderIndex = Orderindex
+
+	err := Coursemodels.UpdateSectionOrderIndex(&Section, sectionid, courses.DB, tenantid)
+
+	if err != nil {
+
+		return false, err
+	}
+
+	return true, nil
+}
+
+//Section OrderIndex Reorder
+
+func (courses *Courses) UpdateSectionOrders(sectionids []int, tenantid string, userid, courseid int) error {
+	autherr := AuthandPermission(courses)
+	if autherr != nil {
+		return autherr
+	}
+
+	var section TblSection
+
+	section.ModifiedBy = userid
+	section.ModifiedOn, _ = time.Parse("2006-01-02 15:04:05", time.Now().UTC().Format("2006-01-02 15:04:05"))
+	section.TenantId = tenantid
+
+	for index, id := range sectionids {
+
+		if id != 0 {
+
+			section.Id = id
+
+			section.OrderIndex = index + 1
+
+			err := Coursemodels.UpdateSectionOrder(&section, courseid, courses.DB)
+
+			if err != nil {
+
+				return err
+			}
+		}
+
+	}
+
+	return nil
 }
