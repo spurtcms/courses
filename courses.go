@@ -265,6 +265,38 @@ func (courses *Courses) EditSections(sectionid int, coursesid int, tenantid stri
 
 }
 
+//Update Section
+
+func (courses *Courses) UpdateSections(update TblSection) error {
+
+	if Autherr := AuthandPermission(courses); Autherr != nil {
+
+		return Autherr
+	}
+
+	modifiedon, _ := time.Parse("2006-01-02 15:04:05", time.Now().UTC().Format("2006-01-02 15:04:05"))
+
+	Update := TblSection{
+		Id:         update.Id,
+		Title:      update.Title,
+		Content:    update.Content,
+		CourseId:   update.CourseId,
+		TenantId:   update.TenantId,
+		ModifiedOn: modifiedon,
+		ModifiedBy: update.ModifiedBy,
+	}
+
+	err := Coursemodels.UpdateSection(Update, courses.DB)
+
+	if err != nil {
+
+		return err
+	}
+
+	return nil
+
+}
+
 //Delete Section
 
 func (courses *Courses) DeleteSections(sectionid, userid int, courseid int, tenantid string) error {
@@ -362,6 +394,38 @@ func (courses *Courses) EditLessons(lessonid int, coursesid int, tenantid string
 
 }
 
+// Update Lesson
+func (courses *Courses) UpdateLessons(update TblLesson) error {
+
+	if Autherr := AuthandPermission(courses); Autherr != nil {
+
+		return Autherr
+	}
+
+	modifiedon, _ := time.Parse("2006-01-02 15:04:05", time.Now().UTC().Format("2006-01-02 15:04:05"))
+
+	Update := TblLesson{
+		Id:         update.Id,
+		CourseId:   update.CourseId,
+		SectionId:  update.SectionId,
+		Title:      update.Title,
+		Content:    update.Content,
+		TenantId:   update.TenantId,
+		ModifiedOn: modifiedon,
+		ModifiedBy: update.ModifiedBy,
+	}
+
+	err := Coursemodels.UpdateLesson(Update, courses.DB)
+
+	if err != nil {
+
+		return err
+	}
+
+	return nil
+
+}
+
 //Delete Lesson
 
 func (courses *Courses) DeleteLessons(lessonid, userid int, courseid int, tenantid string) error {
@@ -388,7 +452,7 @@ func (courses *Courses) DeleteLessons(lessonid, userid int, courseid int, tenant
 
 //Update Order index for Lesson
 
-func (courses *Courses) UpdateLessonOrderIndexes(Orderindex int,lessonid, courseid int, userid int, tenantid string) (bool, error) {
+func (courses *Courses) UpdateLessonOrderIndexes(Orderindex int, lessonid, courseid int, userid int, tenantid string) (bool, error) {
 
 	autherr := AuthandPermission(courses)
 
@@ -401,9 +465,9 @@ func (courses *Courses) UpdateLessonOrderIndexes(Orderindex int,lessonid, course
 
 	Lesson.OrderIndex = Orderindex
 
-	Lesson.TenantId=tenantid
+	Lesson.TenantId = tenantid
 
-	err := Coursemodels.UpdateLessonOrderIndex(&Lesson,lessonid, courseid, courses.DB, tenantid)
+	err := Coursemodels.UpdateLessonOrderIndex(&Lesson, lessonid, courseid, courses.DB, tenantid)
 
 	if err != nil {
 
@@ -415,7 +479,7 @@ func (courses *Courses) UpdateLessonOrderIndexes(Orderindex int,lessonid, course
 
 //Lesson OrderIndex Reorder
 
-func (courses *Courses) UpdateLessonOrders(lessonids []int, tenantid string, userid, courseid int) error {
+func (courses *Courses) UpdateLessonOrders(lessonids []int, tenantid string, userid, courseid int, sectionID int) error {
 	autherr := AuthandPermission(courses)
 	if autherr != nil {
 		return autherr
@@ -435,7 +499,7 @@ func (courses *Courses) UpdateLessonOrders(lessonids []int, tenantid string, use
 
 			lesson.OrderIndex = index + 1
 
-			err := Coursemodels.UpdateLessonOrder(&lesson, courseid, courses.DB)
+			err := Coursemodels.UpdateLessonOrder(&lesson, courseid, sectionID, courses.DB)
 
 			if err != nil {
 
@@ -527,3 +591,4 @@ func (courses *Courses) UpdateSectionOrders(sectionids []int, tenantid string, u
 
 	return nil
 }
+

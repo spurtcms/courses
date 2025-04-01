@@ -262,6 +262,19 @@ func (Coursemodels CoursesModel) EditSection(sectionid int, coursesid int, tenan
 
 }
 
+//Update sections
+
+func (Coursemodels CoursesModel) UpdateSection(update TblSection, DB *gorm.DB) error {
+
+	if err := DB.Table("tbl_sections").Where("id=? and course_id=? and tenant_id=?", update.Id, update.CourseId, update.TenantId).UpdateColumns(map[string]interface{}{"title": update.Title, "content": update.Content, "modified_on": update.ModifiedOn, "modified_by": update.ModifiedBy}).Error; err != nil {
+
+		return err
+	}
+
+	return nil
+
+}
+
 //Section Delete
 
 func (Coursemodels CoursesModel) DeleteSection(sectionid int, coursesid int, tenantid string, deletedby int, deletedon time.Time, DB *gorm.DB) error {
@@ -312,6 +325,19 @@ func (Coursemodels CoursesModel) EditLesson(lessonid int, coursesid int, tenanti
 
 }
 
+//Update Lesson
+
+func (Coursemodels CoursesModel) UpdateLesson(update TblLesson, DB *gorm.DB) error {
+
+	if err := DB.Table("tbl_lessons").Where("id=? and course_id=? and tenant_id=?", update.Id, update.CourseId, update.TenantId).UpdateColumns(map[string]interface{}{"title": update.Title, "content": update.Content, "modified_on": update.ModifiedOn,"modified_by":update.ModifiedBy}).Error; err != nil {
+
+		return err
+	}
+
+	return nil
+
+}
+
 //Delete Lesson
 
 func (Coursemodels CoursesModel) DeleteLesson(lessonid int, coursesid int, tenantid string, deletedby int, deletedon time.Time, DB *gorm.DB) error {
@@ -338,9 +364,9 @@ func (Coursemodels CoursesModel) UpdateLessonOrderIndex(lesson *TblLesson, lesso
 
 //Lesson Reorder
 
-func (Coursemodels CoursesModel) UpdateLessonOrder(lesson *TblLesson, courseid int, DB *gorm.DB) error {
+func (Coursemodels CoursesModel) UpdateLessonOrder(lesson *TblLesson, courseid int, sectionID int, DB *gorm.DB) error {
 
-	if err := DB.Table("tbl_lessons").Where("id=? and course_id=? and tenant_id=?", lesson.Id, courseid, lesson.TenantId).UpdateColumns(map[string]interface{}{"order_index": lesson.OrderIndex, "modified_by": lesson.ModifiedBy, "modified_on": lesson.ModifiedOn}).Error; err != nil {
+	if err := DB.Table("tbl_lessons").Where("id=? and course_id=? and tenant_id=?", lesson.Id, courseid, lesson.TenantId).UpdateColumns(map[string]interface{}{"order_index": lesson.OrderIndex, "section_id": sectionID, "modified_by": lesson.ModifiedBy, "modified_on": lesson.ModifiedOn}).Error; err != nil {
 
 		return err
 	}
@@ -385,3 +411,4 @@ func (Coursemodels CoursesModel) UpdateSectionOrder(Section *TblSection, coursei
 
 	return nil
 }
+
