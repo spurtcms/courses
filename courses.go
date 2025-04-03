@@ -117,10 +117,8 @@ func (courses *Courses) EditCourses(id int, tenantid string) (courselist TblCour
 
 		idc = append(idc, convid)
 	}
-	fmt.Println("ids:", ids)
 
 	GetSelectedCategory, _ := Coursemodels.GetCategoriseById(idc, courses.DB, tenantid)
-	fmt.Println("GetSelectedCategory:", GetSelectedCategory)
 
 	var addcat categories.Arrangecategories
 
@@ -143,6 +141,86 @@ func (courses *Courses) EditCourses(id int, tenantid string) (courselist TblCour
 	FinalSelectedCategories = append(FinalSelectedCategories, addcat)
 
 	return courselist, FinalSelectedCategories, nil
+
+}
+
+func (courses *Courses) UpdateCourses(id, userid int, update TblCourse, tenantid string) error {
+
+	if Autherr := AuthandPermission(courses); Autherr != nil {
+
+		return Autherr
+	}
+
+	modified_on, _ := time.Parse("2006-01-02 15:04:05", time.Now().UTC().Format("2006-01-02 15:04:05"))
+
+	updates := TblCourse{
+		Title:       update.Title,
+		Description: update.Description,
+		ImageName:   update.ImageName,
+		ImagePath:   update.ImagePath,
+		CategoryId:  update.CategoryId,
+		Status:      update.Status,
+		ModifiedOn:  modified_on,
+		ModifiedBy:  userid,
+	}
+
+	err := Coursemodels.UpdateCourse(id, tenantid, updates, courses.DB)
+
+	if err != nil {
+
+		return err
+	}
+
+	return nil
+
+}
+
+func (courses *Courses) EditCourseSettings(id int, tenantid string) (coursesettingslist TblCourseSettings, err error) {
+
+	if Autherr := AuthandPermission(courses); Autherr != nil {
+
+		return TblCourseSettings{}, Autherr
+	}
+
+	coursesettingslist, err = Coursemodels.EditCourseSettings(id, tenantid, courses.DB)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	return coursesettingslist, nil
+
+}
+
+func (courses *Courses) UpdateCourseSettings(id int, update TblCourseSettings, tenantid string) error {
+
+	if Autherr := AuthandPermission(courses); Autherr != nil {
+
+		return Autherr
+	}
+
+	modified_on, _ := time.Parse("2006-01-02 15:04:05", time.Now().UTC().Format("2006-01-02 15:04:05"))
+
+	updates := TblCourseSettings{
+		CourseId:     update.CourseId,
+		Certificate:  update.Certificate,
+		Comments:     update.Comments,
+		Offer:        update.Offer,
+		Visibility:   update.Visibility,
+		StartDate:    update.StartDate,
+		SignUpLimits: update.SignUpLimits,
+		Duration:     update.Duration,
+		ModifiedOn:   modified_on,
+		ModifiedBy:   update.ModifiedBy,
+	}
+
+	err := Coursemodels.UpdateCourseSettings(tenantid, updates, courses.DB)
+
+	if err != nil {
+
+		return err
+	}
+
+	return nil
 
 }
 
@@ -591,4 +669,3 @@ func (courses *Courses) UpdateSectionOrders(sectionids []int, tenantid string, u
 
 	return nil
 }
-

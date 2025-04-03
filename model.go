@@ -66,6 +66,48 @@ type TblCourses struct {
 	LastName         string    `gorm:"column:last_name"`
 	UserName         string    `gorm:"column:username"`
 	NameString       string    `gorm:"-"`
+	Offer            string    `gorm:"column:offer"`
+}
+
+//TblCourseSettings
+
+type TblCourseSettings struct {
+	Id           int       `gorm:"primaryKey;auto_increment;type:serial"`
+	CourseId     int       `gorm:"type:integer"`
+	Certificate  int       `gorm:"type:integer"`
+	Comments     int       `gorm:"type:integer"`
+	Offer        string    `gorm:"type:character varying"`
+	Visibility   string    `gorm:"type:character varying"`
+	StartDate    string    `gorm:"type:character varying"`
+	SignUpLimits int       `gorm:"type:integer"`
+	Duration     string    `gorm:"type:character varying"`
+	CreatedOn    time.Time `gorm:"type:timestamp without time zone"`
+	CreatedBy    int       `gorm:"type:integer"`
+	IsDeleted    int       `gorm:"type:integer"`
+	DeletedOn    time.Time `gorm:"type:timestamp without time zone;DEFAULT:NULL"`
+	DeletedBy    int       `gorm:"DEFAULT:NULL"`
+	ModifiedOn   time.Time `gorm:"type:timestamp without time zone;DEFAULT:NULL"`
+	ModifiedBy   int       `gorm:"DEFAULT:NULL"`
+	TenantId     string    `gorm:"type:character varying"`
+}
+
+//Settings Page List Table
+
+type TblSettingsPages struct {
+	Id           int    `gorm:"primaryKey;auto_increment;type:serial"`
+	Title        string `gorm:"type:character varying"`
+	Description  string `gorm:"type:character varying"`
+	ImageName    string `gorm:"type:character varying"`
+	ImagePath    string `gorm:"type:character varying"`
+	CategoryId   string `gorm:"type:character varying"`
+	Status       int    `gorm:"type:integer"`
+	Certificate  int    `gorm:"type:integer"`
+	Comments     int    `gorm:"type:integer"`
+	Offer        string `gorm:"type:character varying"`
+	Visibility   string `gorm:"type:character varying"`
+	StartDate    string `gorm:"type:character varying"`
+	SignUpLimits int    `gorm:"type:integer"`
+	Duration     string `gorm:"type:character varying"`
 }
 
 //Create Section
@@ -110,7 +152,7 @@ type TblLesson struct {
 
 func (Coursesmodels CoursesModel) ListCourses(limit, offset int, filter Filter, tenantid string, DB *gorm.DB) (courselist []TblCourses, count int64, err error) {
 
-	query := DB.Table("tbl_courses").Select("tbl_courses.*,tbl_users.profile_image_path,tbl_users.first_name,tbl_users.last_name,tbl_users.username").Joins("inner join tbl_users on tbl_courses.created_by=tbl_users.id").Where("tbl_courses.is_deleted=0 and tbl_courses.tenant_id=?", tenantid)
+	query := DB.Table("tbl_courses").Select("tbl_courses.*,tbl_course_settings.offer,tbl_users.profile_image_path,tbl_users.first_name,tbl_users.last_name,tbl_users.username").Joins("inner join tbl_users on tbl_courses.created_by=tbl_users.id").Joins("inner join tbl_course_settings on tbl_courses.id=tbl_course_settings.course_id").Where("tbl_courses.is_deleted=0 and tbl_courses.tenant_id=?", tenantid)
 
 	if filter.Sorting == "lastUpdated" {
 
@@ -175,7 +217,20 @@ func (Coursemodels CoursesModel) CreateCourse(course TblCourse, DB *gorm.DB) err
 
 		return err
 	}
-	fmt.Println("hello world courses created")
+
+	createsettings := TblCourseSettings{
+		CourseId:  course.Id,
+		Comments:  0,
+		CreatedBy: course.CreatedBy,
+		CreatedOn: course.CreatedOn,
+		IsDeleted: 0,
+		TenantId:  course.TenantId,
+	}
+
+	if err := DB.Table("tbl_course_settings").Create(&createsettings).Error; err != nil {
+
+		return err
+	}
 
 	return nil
 
@@ -190,6 +245,44 @@ func (Coursemodels CoursesModel) EditCourse(id int, tenantid string, DB *gorm.DB
 
 	return courselist, nil
 
+}
+
+func (Coursemodels CoursesModel) UpdateCourse(id int, tenantid string, update TblCourse, DB *gorm.DB) error {
+
+	if update.ImagePath != "" {
+		if err := DB.Table("tbl_courses").Where("id=? and tenant_id=?", id, tenantid).UpdateColumns(map[string]interface{}{"title": update.Title, "description": update.Description, "image_name": update.ImageName, "image_path": update.ImagePath, "category_id": update.CategoryId, "status": update.Status, "modified_on": update.ModifiedOn, "modified_by": update.ModifiedBy}).Error; err != nil {
+
+			return err
+		}
+	} else {
+		if err := DB.Table("tbl_courses").Where("id=? and tenant_id=?", id, tenantid).UpdateColumns(map[string]interface{}{"title": update.Title, "description": update.Description, "category_id": update.CategoryId, "status": update.Status, "modified_on": update.ModifiedOn, "modified_by": update.ModifiedBy}).Error; err != nil {
+
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (Coursemodels CoursesModel) EditCourseSettings(id int, tenantid string, DB *gorm.DB) (coursesettinglist TblCourseSettings, err error) {
+
+	if err := DB.Table("tbl_course_settings").Where("course_id=? and tenant_id=? and is_deleted=0", id, tenantid).First(&coursesettinglist).Error; err != nil {
+
+		return TblCourseSettings{}, err
+	}
+
+	return coursesettinglist, nil
+
+}
+
+func (Coursemodels CoursesModel) UpdateCourseSettings(tenantid string, update TblCourseSettings, DB *gorm.DB) error {
+
+	if err := DB.Table("tbl_course_settings").Where("course_id=? and tenant_id=?", update.CourseId, tenantid).UpdateColumns(map[string]interface{}{"certificate": update.Certificate, "comments": update.Comments, "offer": update.Offer, "visibility": update.Visibility, "start_date": update.StartDate, "sign_up_limits": update.SignUpLimits, "duration": update.Duration, "modified_on": update.ModifiedOn, "modified_by": update.ModifiedBy}).Error; err != nil {
+
+		return err
+	}
+
+	return nil
 }
 
 func (Coursemodels CoursesModel) DeleteCourse(id int, tenantid string, deletedby int, deletedon time.Time, DB *gorm.DB) error {
@@ -329,7 +422,7 @@ func (Coursemodels CoursesModel) EditLesson(lessonid int, coursesid int, tenanti
 
 func (Coursemodels CoursesModel) UpdateLesson(update TblLesson, DB *gorm.DB) error {
 
-	if err := DB.Table("tbl_lessons").Where("id=? and course_id=? and tenant_id=?", update.Id, update.CourseId, update.TenantId).UpdateColumns(map[string]interface{}{"title": update.Title, "content": update.Content, "modified_on": update.ModifiedOn,"modified_by":update.ModifiedBy}).Error; err != nil {
+	if err := DB.Table("tbl_lessons").Where("id=? and course_id=? and tenant_id=?", update.Id, update.CourseId, update.TenantId).UpdateColumns(map[string]interface{}{"title": update.Title, "content": update.Content, "modified_on": update.ModifiedOn, "modified_by": update.ModifiedBy}).Error; err != nil {
 
 		return err
 	}
@@ -411,4 +504,3 @@ func (Coursemodels CoursesModel) UpdateSectionOrder(Section *TblSection, coursei
 
 	return nil
 }
-
