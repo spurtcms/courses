@@ -221,6 +221,7 @@ func (Coursemodels CoursesModel) CreateCourse(course TblCourse, DB *gorm.DB) err
 	createsettings := TblCourseSettings{
 		CourseId:  course.Id,
 		Comments:  0,
+		Offer:     "free",
 		CreatedBy: course.CreatedBy,
 		CreatedOn: course.CreatedOn,
 		IsDeleted: 0,
