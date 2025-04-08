@@ -423,7 +423,8 @@ func (Coursemodels CoursesModel) EditLesson(lessonid int, coursesid int, tenanti
 
 func (Coursemodels CoursesModel) UpdateLesson(update TblLesson, DB *gorm.DB) error {
 
-	if err := DB.Table("tbl_lessons").Where("id=? and course_id=? and tenant_id=?", update.Id, update.CourseId, update.TenantId).UpdateColumns(map[string]interface{}{"title": update.Title, "content": update.Content, "modified_on": update.ModifiedOn, "modified_by": update.ModifiedBy}).Error; err != nil {
+	if err := DB.Table("tbl_lessons").Where("id=? and course_id=? and tenant_id=?", update.Id, update.CourseId, update.TenantId).UpdateColumns(map[string]interface{}{"title": update.Title, "content": update.Content,
+		"embed_link": update.EmbedLink, "modified_on": update.ModifiedOn, "modified_by": update.ModifiedBy}).Error; err != nil {
 
 		return err
 	}
