@@ -416,6 +416,7 @@ func (courses *Courses) CreateLessons(lesson TblLesson) error {
 		Title:      lesson.Title,
 		Content:    lesson.Content,
 		EmbedLink:  lesson.EmbedLink,
+		FilePath:   lesson.FilePath,
 		OrderIndex: lesson.OrderIndex,
 		TenantId:   lesson.TenantId,
 		LessonType: lesson.LessonType,

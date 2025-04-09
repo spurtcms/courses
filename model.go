@@ -138,6 +138,7 @@ type TblLesson struct {
 	Content    string    `gorm:"type:character varying"`
 	EmbedLink  string    `gorm:"type:character varying"`
 	FileName   string    `gorm:"type:character varying"`
+	FilePath   string    `gorm:"type:character varying"`
 	LessonType string    `gorm:"type:character varying"`
 	OrderIndex int       `gorm:"type:integer"`
 	TenantId   string    `gorm:"type:character varying"`
