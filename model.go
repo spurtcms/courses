@@ -12,6 +12,7 @@ type Filter struct {
 	Keyword     string
 	Category    string
 	Status      string
+	Pricing     string
 	Sorting     string
 	CourseTitle string
 }
@@ -192,6 +193,12 @@ func (Coursesmodels CoursesModel) ListCourses(limit, offset int, filter Filter, 
 	if filter.Status != "" {
 
 		query = query.Where("tbl_courses.status=?", filter.Status)
+		
+	}
+
+	if filter.Pricing != "" {
+
+		query = query.Where("tbl_course_settings.offer=?", filter.Pricing)
 
 	}
 
@@ -222,7 +229,7 @@ func (Coursemodels CoursesModel) CreateCourse(course TblCourse, DB *gorm.DB) err
 	createsettings := TblCourseSettings{
 		CourseId:  course.Id,
 		Comments:  0,
-		Offer:     "free",
+		Offer:     "Free",
 		CreatedBy: course.CreatedBy,
 		CreatedOn: course.CreatedOn,
 		IsDeleted: 0,
