@@ -31,7 +31,7 @@ type TblCourse struct {
 	Description string    `gorm:"type:character varying"`
 	ImageName   string    `gorm:"type:character varying"`
 	ImagePath   string    `gorm:"type:character varying"`
-	CategoryId  string    `gorm:"type:character varying"`
+	CategoryId  int       `gorm:"type:integer"`
 	Status      int       `gorm:"type:integer"`
 	TenantId    string    `gorm:"type:character varying"`
 	CreatedOn   time.Time `gorm:"type:timestamp without time zone;DEFAULT:NULL"`
@@ -50,7 +50,7 @@ type TblCourses struct {
 	Description      string    `gorm:"type:character varying"`
 	ImageName        string    `gorm:"type:character varying"`
 	ImagePath        string    `gorm:"type:character varying"`
-	CategoryId       string    `gorm:"type:character varying"`
+	CategoryId       int       `gorm:"type:integer"`
 	Status           int       `gorm:"type:integer"`
 	TenantId         string    `gorm:"type:character varying"`
 	CreatedOn        time.Time `gorm:"type:timestamp without time zone;DEFAULT:NULL"`
@@ -100,7 +100,7 @@ type TblSettingsPages struct {
 	Description  string `gorm:"type:character varying"`
 	ImageName    string `gorm:"type:character varying"`
 	ImagePath    string `gorm:"type:character varying"`
-	CategoryId   string `gorm:"type:character varying"`
+	CategoryId   int    `gorm:"type:integer"`
 	Status       int    `gorm:"type:integer"`
 	Certificate  int    `gorm:"type:integer"`
 	Comments     int    `gorm:"type:integer"`
@@ -193,7 +193,7 @@ func (Coursesmodels CoursesModel) ListCourses(limit, offset int, filter Filter, 
 	if filter.Status != "" {
 
 		query = query.Where("tbl_courses.status=?", filter.Status)
-		
+
 	}
 
 	if filter.Pricing != "" {
@@ -315,14 +315,35 @@ func (Coursemodels CoursesModel) MultiSelectCourseDelete(course *TblCourse, id [
 
 }
 
-func (Coursemodels CoursesModel) GetCategoriseById(id []int, DB *gorm.DB, tenantid string) (category []categories.TblCategories, err error) {
+func (Coursemodels CoursesModel) GetCategoriseById(ids int, DB *gorm.DB, tenantid string) (categorys []categories.TblCategories, err error) {
 
-	if err := DB.Table("tbl_categories").Where("id in (?) and tenant_id=?", id, tenantid).Order("id asc").Find(&category).Error; err != nil {
+	var (
+		id       = ids
+		tenantID = tenantid
+		category []categories.TblCategories
+		result   []categories.TblCategories
+	)
 
-		return category, err
+	for id != 0 {
+		category = []categories.TblCategories{}
+
+		err := DB.Table("tbl_categories").Where("id = ? AND tenant_id = ?", id, tenantID).Order("id ASC").
+			Find(&category).Error
+
+		if err != nil {
+			return result, err
+		}
+
+		if len(category) == 0 {
+			break
+		}
+
+		result = append(result, category...)
+
+		id = category[0].ParentId
 	}
 
-	return category, nil
+	return result, nil
 
 }
 
@@ -513,4 +534,46 @@ func (Coursemodels CoursesModel) UpdateSectionOrder(Section *TblSection, coursei
 	}
 
 	return nil
+}
+
+//CourseList for React Api
+
+func (Coursesmodels CoursesModel) CourseList(status int, tenantid string, categoryid int, DB *gorm.DB) (courselist []TblCourses, count int64, err error) {
+
+	
+	var category categories.TblCategories
+	cerr := DB.Table("tbl_categories").Where("tenant_id = ? AND category_name = ?", tenantid, "Courses").First(&category).Error
+
+	if cerr != nil {
+		fmt.Println("Error fetching category:", cerr)
+	}
+
+	query := DB.Table("tbl_courses").Select("tbl_courses.*,tbl_course_settings.offer,tbl_users.profile_image_path,tbl_users.first_name,tbl_users.last_name,tbl_users.username").Joins("inner join tbl_users on tbl_courses.created_by=tbl_users.id").Joins("inner join tbl_course_settings on tbl_courses.id=tbl_course_settings.course_id").Where("tbl_courses.is_deleted=0 and tbl_courses.tenant_id=?", tenantid)
+
+	if categoryid != category.Id {
+		query = query.Where("tbl_courses.category_id = ?", categoryid)
+	}
+
+	if status != 0 {
+
+		query = query.Where("tbl_courses.status=?", status)
+
+	}
+
+	// if limit != 0 {
+
+	// 	query.Limit(limit).Offset(offset).Find(&courselist)
+
+	// 	return courselist, count, nil
+
+	// }
+
+	query.Find(&courselist).Count(&count)
+
+	if query.Error != nil {
+
+		return []TblCourses{}, 0, query.Error
+	}
+
+	return courselist, count, nil
 }

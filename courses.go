@@ -2,8 +2,6 @@ package courses
 
 import (
 	"fmt"
-	"strconv"
-	"strings"
 	"time"
 
 	"github.com/spurtcms/auth/migration"
@@ -13,8 +11,6 @@ import (
 func CoursesSetup(config Config) *Courses {
 
 	migration.AutoMigration(config.DB, config.DataBaseType)
-
-	fmt.Println("hello")
 
 	return &Courses{
 		AuthEnable:       config.AuthEnable,
@@ -93,11 +89,11 @@ func (courses *Courses) CreateCourse(create TblCourse) error {
 
 }
 
-func (courses *Courses) EditCourses(id int, tenantid string) (courselist TblCourse, category []categories.Arrangecategories, err error) {
+func (courses *Courses) EditCourses(id int, tenantid string) (courselist TblCourse, category []categories.TblCategories, err error) {
 
 	if Autherr := AuthandPermission(courses); Autherr != nil {
 
-		return TblCourse{}, []categories.Arrangecategories{}, Autherr
+		return TblCourse{}, []categories.TblCategories{}, Autherr
 	}
 
 	courselist, err = Coursemodels.EditCourse(id, tenantid, courses.DB)
@@ -105,42 +101,9 @@ func (courses *Courses) EditCourses(id int, tenantid string) (courselist TblCour
 		fmt.Println(err)
 	}
 
-	var FinalSelectedCategories []categories.Arrangecategories
+	GetSelectedCategory, _ := Coursemodels.GetCategoriseById(courselist.CategoryId, courses.DB, tenantid)
 
-	var idc []int
-
-	ids := strings.Split(courselist.CategoryId, ",")
-
-	for _, cid := range ids {
-
-		convid, _ := strconv.Atoi(cid)
-
-		idc = append(idc, convid)
-	}
-
-	GetSelectedCategory, _ := Coursemodels.GetCategoriseById(idc, courses.DB, tenantid)
-
-	var addcat categories.Arrangecategories
-
-	var individualid []categories.CatgoriesOrd
-
-	for _, CategoriesArrange := range GetSelectedCategory {
-
-		var individual categories.CatgoriesOrd
-
-		individual.Id = CategoriesArrange.Id
-
-		individual.Category = CategoriesArrange.CategoryName
-
-		individualid = append(individualid, individual)
-
-	}
-
-	addcat.Categories = individualid
-
-	FinalSelectedCategories = append(FinalSelectedCategories, addcat)
-
-	return courselist, FinalSelectedCategories, nil
+	return courselist, GetSelectedCategory, nil
 
 }
 
@@ -671,4 +634,17 @@ func (courses *Courses) UpdateSectionOrders(sectionids []int, tenantid string, u
 	}
 
 	return nil
+}
+
+//CourseList for React Api
+
+func (courses *Courses) CourseList(status int, tenantid string, categoryid int) (list []TblCourses, Count int64, err error) {
+
+	courselist, count, err := Coursemodels.CourseList(status, tenantid, categoryid, courses.DB)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	return courselist, count, nil
+
 }
