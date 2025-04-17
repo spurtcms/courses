@@ -158,7 +158,7 @@ func (Coursesmodels CoursesModel) ListCourses(limit, offset int, filter Filter, 
 
 	if filter.Sorting == "lastUpdated" {
 
-		query = query.Order("modified_on desc")
+		query = query.Order("modified_on asc")
 
 	} else if filter.Sorting == "createdDate" {
 
@@ -540,7 +540,6 @@ func (Coursemodels CoursesModel) UpdateSectionOrder(Section *TblSection, coursei
 
 func (Coursesmodels CoursesModel) CourseList(status int, tenantid string, categoryid int, DB *gorm.DB) (courselist []TblCourses, count int64, err error) {
 
-	
 	var category categories.TblCategories
 	cerr := DB.Table("tbl_categories").Where("tenant_id = ? AND category_name = ?", tenantid, "Courses").First(&category).Error
 

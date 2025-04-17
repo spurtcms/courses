@@ -648,3 +648,34 @@ func (courses *Courses) CourseList(status int, tenantid string, categoryid int) 
 	return courselist, count, nil
 
 }
+
+//SectionList for React Api
+
+func (courses *Courses) SectionList(id int, tenantid string) (section []TblSection, err error) {
+
+	sectionlist, err := Coursemodels.SectionList(id, tenantid, courses.DB)
+
+	if err != nil {
+
+		return []TblSection{}, err
+	}
+
+	return sectionlist, nil
+
+}
+
+//LessonList for React Api
+
+func (courses *Courses) LessonList(id int, tenantid string) (lesson []TblLesson, err error) {
+
+
+	lessonlist, err := Coursemodels.LessonList(id, tenantid, courses.DB)
+
+	if err != nil {
+
+		return []TblLesson{}, err
+	}
+
+	return lessonlist, nil
+
+}
