@@ -407,6 +407,11 @@ func (Coursemodels CoursesModel) DeleteSection(sectionid int, coursesid int, ten
 		return err
 	}
 
+	if err := DB.Table("tbl_lessons").Where("section_id=? and course_id=? and tenant_id=?", sectionid, coursesid, tenantid).UpdateColumns(map[string]interface{}{"is_deleted": 1, "deleted_by": deletedby, "deleted_on": deletedon}).Error; err != nil {
+
+		return err
+	}
+
 	return nil
 }
 
