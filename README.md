@@ -1,6 +1,6 @@
 # Courses Package
 
-The SpurtCMS Courses Package allows you to create, manage, and deliver educational content with ease. It supports organizing content into courses, modules, and lessons, along with features for enrollment management, progress tracking, and access control. Whether you're building an e-learning platform, internal training system, or paid course site, this package gives you the tools to structure and present educational material effectively.
+The SpurtCMS Courses Package allows you to create, manage, and deliver educational content with ease. It supports organizing content into courses, modules, and lessons, making it ideal for building e-learning platforms, internal training systems, or paid course sites. This package gives you the tools to structure and present educational material effectively.
 
 
 ## Features
