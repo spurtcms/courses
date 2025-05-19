@@ -1,6 +1,6 @@
 # Courses Package
 
-The Channels work in harmony to enhance content management in websites. Channels provide structured containers for organizing diverse data, each tailored to a specific content type. Our Channels package offers a robust solution for organizing and managing data within your Golang projects, providing a structured framework for seamless information storage and retrieval.
+The SpurtCMS Courses Package allows you to create, manage, and deliver educational content with ease. It supports organizing content into courses, modules, and lessons, along with features for enrollment management, progress tracking, and access control. Whether you're building an e-learning platform, internal training system, or paid course site, this package gives you the tools to structure and present educational material effectively.
 
 
 ## Features
