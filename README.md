@@ -5,18 +5,17 @@ The SpurtCMS Courses Package allows you to create, manage, and deliver education
 
 ## Features
 
-- Enables retrieving channels, fetching channels based on user permissions, and obtaining details about specific channels by their IDs.  
-- Administrators can create, edit, and delete channels, as well as modify their status.
-- Facilitates the management of channel entries by allowing administrators to retrieve all entries across channels, fetch published entries, create new entries, and delete existing ones.
-- Retrieving additional field data for specific channels, fetching details about individual entries by their IDs, updating entry details, modifying entry statuses.
-- Retrieval of master field types for channels and provides a list of channels for display on the admin dashboard.
-
+- Create and manage multiple courses with categories and tags
+- Organize content into modules and lessons
+- Assign courses based on membership level or group
+- Restrict courses to specific users, groups, or subscription plans
+- Add quizzes or tests to evaluate learning
 
 
 # Installation
 
 ``` bash
-go get github.com/spurtcms/channels
+go get github.com/spurtcms/courses
 ```
 
 
@@ -26,4 +25,4 @@ go get github.com/spurtcms/channels
 
 
 # Getting help
-If you encounter a problem with the package,please refer [Please refer [(https://www.spurtcms.com/documentation/cms-admin)] or you can create a new Issue in this repo[https://github.com/spurtcms/channels/issues]. 
+If you encounter a problem with the package,please refer [Please refer [(https://www.spurtcms.com/documentation/cms-admin)] or you can create a new Issue in this repo[https://github.com/spurtcms/courses/issues]. 
