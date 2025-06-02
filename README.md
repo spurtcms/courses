@@ -34,8 +34,8 @@ func main() {
 		UserId:     1,
 		ExpiryTime: 2,
 		SecretKey:  "SecretKey@123",
-		DB: &gorm.DB{},
-		RoleId: 1,
+		DB:         &gorm.DB{},
+		RoleId:     1,
 	})
 
 	token, _ := Auth.CreateToken()
@@ -62,7 +62,7 @@ func main() {
 
 		//create Course
 
-        	Create := courses.TblCourse{
+		Create := courses.TblCourse{
 			Title:       "Golang",
 			Description: "Language",
 			CategoryId:  1,
@@ -77,19 +77,18 @@ func main() {
 			fmt.Println(createerr)
 		}
 
-
 		//update Course
-        UpdateCourse := courses.TblCourse{
-		Id:          1,
-		Title:       "Go",
-		Description: "Static Language",
-		CategoryId:  2,
-		Status:      1,
-	    }
-	    err := CoursesConfig.UpdateCourses(1, 1, UpdateCourse, 1)
-	    if err != nil {
-		    fmt.Println(err)
-	    }
+		UpdateCourse := courses.TblCourse{
+			Id:          1,
+			Title:       "Go",
+			Description: "Static Language",
+			CategoryId:  2,
+			Status:      1,
+		}
+		err := CoursesConfig.UpdateCourses(1, 1, UpdateCourse, 1)
+		if err != nil {
+			fmt.Println(err)
+		}
 
 		// delete Course
 		err := CoursesConfig.DeleteCourses(1, 1, 1)
@@ -99,89 +98,89 @@ func main() {
 			return
 		}
 
-        //create Lessons
-        create := courses.TblLesson{
-		CourseId:   1,
-		SectionId:  0,
-		Title:      "Concurrency",
-		Content:    "<h1>Hello world</h1>",
-		OrderIndex: 1,
-		TenantId:   1,
-		CreatedBy:  1,
-		IsDeleted:  0,
-	    }
+		//create Lessons
+		create := courses.TblLesson{
+			CourseId:   1,
+			SectionId:  0,
+			Title:      "Concurrency",
+			Content:    "<h1>Hello world</h1>",
+			OrderIndex: 1,
+			TenantId:   1,
+			CreatedBy:  1,
+			IsDeleted:  0,
+		}
 
-        err := CoursesConfig.CreateLessons(create)
+		err := CoursesConfig.CreateLessons(create)
 		if err != nil {
 			fmt.Println(err)
 		}
 
-        //edit Lesson
-        lesson, err := CoursesConfig.EditLessons(1, 1, 1)
+		//edit Lesson
+		lesson, err := CoursesConfig.EditLessons(1, 1, 1)
 		if err != nil {
 			fmt.Println(err)
 		}
 
-        //update Lesson
-        update := courses.TblLesson{
-		Id:         1,
-		CourseId:   1,
-		SectionId:  0,
-		Title:      "Concurrent",
-		Content:    "<h1>Hello world Golang</h1>",
-		TenantId:   1,
-		ModifiedBy: 1,
-	   }
-        err := CoursesConfig.UpdateLessons(update)
+		//update Lesson
+		update := courses.TblLesson{
+			Id:         1,
+			CourseId:   1,
+			SectionId:  0,
+			Title:      "Concurrent",
+			Content:    "<h1>Hello world Golang</h1>",
+			TenantId:   1,
+			ModifiedBy: 1,
+		}
+		err := CoursesConfig.UpdateLessons(update)
 		if err != nil {
 			fmt.Println(err)
 		}
 
-        //delete Lesson
-        err := CoursesConfig.DeleteLessons(1, 1, 1, 1)
+		//delete Lesson
+		err := CoursesConfig.DeleteLessons(1, 1, 1, 1)
 		if err != nil {
 			fmt.Println(err)
 			c.Redirect(301, "/403-page")
 			return
 		}
 
-        //create Section
-        create := courses.TblSection{
-		Title:      "Parallesim",
-		Content:    "<p>Helo</p>",
-		CourseId:   1,
-		OrderIndex: 1,
-		TenantId:   1,
-		CreatedBy:  1,
-		IsDeleted:  0,
-	    }
-        err := CoursesConfig.CreateSections(create)
+		//create Section
+		create := courses.TblSection{
+			Title:      "Parallesim",
+			Content:    "<p>Helo</p>",
+			CourseId:   1,
+			OrderIndex: 1,
+			TenantId:   1,
+			CreatedBy:  1,
+			IsDeleted:  0,
+		}
+		err := CoursesConfig.CreateSections(create)
 		if err != nil {
 			fmt.Println(err)
 		}
 
-        //edit Section
-        section, err := CoursesConfig.EditSections(1, 1, 1)
+		//edit Section
+		section, err := CoursesConfig.EditSections(1, 1, 1)
 		if err != nil {
 			fmt.Println(err)
 		}
 
-        //update Section
-        Update := courses.TblSection{
-		Id:         1,
-		Title:      "Parallel",
-		Content:    "<p>Helo Golang</p>",
-		CourseId:   1,
-		TenantId:   1,
-		ModifiedBy: 1,
-	    }
-        err := CoursesConfig.UpdateSections(Update)
+		//update Section
+		Update := courses.TblSection{
+			Id:         1,
+			Title:      "Parallel",
+			Content:    "<p>Helo Golang</p>",
+			CourseId:   1,
+			TenantId:   1,
+			ModifiedBy: 1,
+		}
+		err := CoursesConfig.UpdateSections(Update)
 		if err != nil {
 			fmt.Println(err)
 		}
 
-        //delete Section
-        err := CoursesConfig.DeleteSections(1, 1, 1, 1)
+		//delete Section
+		err := CoursesConfig.DeleteSections(1, 1, 1, 1)
 		if err != nil {
 			fmt.Println(err)
 			c.Redirect(301, "/403-page")
@@ -190,6 +189,7 @@ func main() {
 
 	}
 }
+
 
 ```
 
